@@ -24,21 +24,21 @@ describe('hasListeners', () => {
 		let x, y;
 		assert.equal(hasListeners(true, 'test'), false, "Primitive");
 		assert.equal(hasListeners({ events: [] }, 'test'), false, "Other object");
-		assert.equal(hasListeners(x = ee(), 'test'), false, "Emitter: empty");
+		assert.isNotOk(hasListeners(x = ee(), 'test'), "Emitter: empty");
 
 		x.on('test', y = function () {});
-		assert.equal(hasListeners(x, 'test'), true, "Emitter: full");
-		assert.equal(hasListeners(x, 'foo'), false, "Emitter: full, other event");
+		assert.isOk(hasListeners(x, 'test'), "Emitter: full");
+		assert.isNotOk(hasListeners(x, 'foo'), "Emitter: full, other event");
 		x.off('test', y);
-		assert.equal(hasListeners(x, 'test'), false, "Emitter: empty but touched");
-		assert.equal(hasListeners(x, 'foo'), false, "Emitter: empty but touched, other event");
+		assert.isNotOk(hasListeners(x, 'test'), "Emitter: empty but touched");
+		assert.isNotOk(hasListeners(x, 'foo'), "Emitter: empty but touched, other event");
 
 		x.once('test', y = function () {});
-		assert.equal(hasListeners(x, 'test'), true, "Emitter: full: Once");
-		assert.equal(hasListeners(x, 'foo'), false, "Emitter: full: Once,  other event");
+		assert.isOk(hasListeners(x, 'test'), "Emitter: full: Once");
+		assert.isNotOk(hasListeners(x, 'foo'), "Emitter: full: Once,  other event");
 		x.off('test', y);
-		assert.equal(hasListeners(x, 'test'), false, "Emitter: empty but touched by once");
-		assert.equal(hasListeners(x, 'foo'), false, "Emitter: empty but touched by once, other event");
+		assert.isNotOk(hasListeners(x, 'test'), "Emitter: empty but touched by once");
+		assert.isNotOk(hasListeners(x, 'foo'), "Emitter: empty but touched by once, other event");
 
 	});
 });
