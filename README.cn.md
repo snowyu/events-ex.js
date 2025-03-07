@@ -1,4 +1,4 @@
-### events-ex [![Build Status](https://img.shields.io/travis/snowyu/events-ex.js/master.png)](http://travis-ci.org/snowyu/events-ex.js) [![npm](https://img.shields.io/npm/v/events-ex.svg)](https://npmjs.org/package/events-ex) [![downloads](https://img.shields.io/npm/dm/events-ex.svg)](https://npmjs.org/package/events-ex) [![license](https://img.shields.io/npm/l/events-ex.svg)](https://npmjs.org/package/events-ex)
+### events-ex [![npm](https://img.shields.io/npm/v/events-ex.svg)](https://npmjs.org/package/events-ex) [![downloads](https://img.shields.io/npm/dm/events-ex.svg)](https://npmjs.org/package/events-ex) [![license](https://img.shields.io/npm/l/events-ex.svg)](https://npmjs.org/package/events-ex)
 
 
 浏览器友好的增强的**事件**[能力][Ability]和类。 它主要是从 [event-emitter][event-emitter] 修改而来的。 本库可以为你的任何类添加(注入)**事件**[能力][Ability]。
