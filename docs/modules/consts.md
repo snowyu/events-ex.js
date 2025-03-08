@@ -17,7 +17,7 @@
 
 #### Defined in
 
-[src/consts.js:13](https://github.com/snowyu/events-ex.js/blob/5b9fac0/src/consts.js#L13)
+[src/consts.js:13](https://github.com/snowyu/events-ex.js/blob/0aebeb6/src/consts.js#L13)
 
 ___
 
@@ -36,4 +36,4 @@ ___
 
 #### Defined in
 
-[src/consts.js:6](https://github.com/snowyu/events-ex.js/blob/5b9fac0/src/consts.js#L6)
+[src/consts.js:6](https://github.com/snowyu/events-ex.js/blob/0aebeb6/src/consts.js#L6)

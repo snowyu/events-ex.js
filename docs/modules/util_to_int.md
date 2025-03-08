@@ -36,4 +36,4 @@ Renames and re-exports [toInt](util_to_int.md#toint)
 
 #### Defined in
 
-[src/util/to-int.js:2](https://github.com/snowyu/events-ex.js/blob/5b9fac0/src/util/to-int.js#L2)
+[src/util/to-int.js:2](https://github.com/snowyu/events-ex.js/blob/0aebeb6/src/util/to-int.js#L2)

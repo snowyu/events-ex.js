@@ -36,4 +36,4 @@ Renames and re-exports [remove](util_array_remove.md#remove)
 
 #### Defined in
 
-[src/util/array-remove.js:5](https://github.com/snowyu/events-ex.js/blob/5b9fac0/src/util/array-remove.js#L5)
+[src/util/array-remove.js:5](https://github.com/snowyu/events-ex.js/blob/0aebeb6/src/util/array-remove.js#L5)
