@@ -37,7 +37,7 @@
   "main": "./lib/index.js",
   "module": "./src/index.js",
   "dependencies": {
-    "custom-ability": "^2.0.0",
+    "custom-ability": "^2.0.1",
     "util-ex": "^2.0.0"
   },
   "devDependencies": {
@@ -51,7 +51,7 @@
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-tsdoc": "^0.2.17",
-    "mocha": "^10.2.0",
+    "mocha": "^10.6.0",
     "prettier": "^3.1.1",
     "typedoc": "^0.25.4",
     "typedoc-plugin-markdown": "^3.17.1",
