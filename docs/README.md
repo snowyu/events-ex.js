@@ -26,6 +26,16 @@ Browser-friendly enhanced event emitter [ability][Ability] and class. It's modif
     * **`broken change`**: The `this` object of listeners' callback function is the `Event` Object instead of the emitter object.
       * The emitter object is put into the `target` property of the `Event` Object.
   * Adds async event emitting via `emitAsync` method.
+  * ⚡ Added `emitAsync` Method:
+    * Ensures all async listeners complete before returning results.
+    * Ideal for scenarios requiring sequential async tasks (e.g., data validation, plugin systems).
+  * Listener APIs: `on/once(event: string|RegExp, listener, index?: number)`
+    * 📌 **Index Parameter** (Optional):
+      * Allows specifying the insertion position in the listener array.
+      * Useful for precise control over listener execution order (e.g., pre-interception logic).
+    * 🧪 **Regex Event Matching**:
+      * Listeners can bind to multiple events via regex patterns.
+      * Great for handling events with naming patterns (e.g., logs, state changes).
 * Difference with [event-emitter](https://github.com/medikoo/event-emitter)
   + **`broken change`**: The event supports bubbling and interruption(see above)
   + Adds the defaultMaxListeners class property to keep compatibility with node events.
@@ -34,6 +44,15 @@ Browser-friendly enhanced event emitter [ability][Ability] and class. It's modif
   + Adds listeners() method to keep compatibility with node events.
   + Adds listenerCount() class method to keep compatibility with node events.
   * Adds async event emitting via `emitAsync` method.
+* 🔗 **Event Piping & Unification**:
+  * `pipe(source, target)`: Forwards events from one emitter to another.
+  * `unify(emitter1, emitter2)`: Bi-directional event synchronization (e.g., shared state management).
+* 📦 **Utility Functions**:
+  * Includes `allOff()`, `hasListeners()`, `listenerCount()` for debugging and lifecycle management.
+  * Enhances robustness in event-driven architectures.
+* 🔌 **Modular Ability Injection**:
+  * `eventable(MyClass)`: Inject event capabilities into any class without inheritance.
+  * Configurable inclusion/exclusion of methods to avoid prototype pollution.
 
 Note: The listener throw error should not broke the notification, but it will emit error(`emit('error', error, 'notify', eventName, listener, args)`) after notification.
 

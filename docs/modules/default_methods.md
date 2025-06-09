@@ -41,11 +41,11 @@ Renames and re-exports [getEventableMethods](default_methods.md#geteventablemeth
 | `listenerCount` | (`emitter`: `any`, `type`: `any`) => `number` |
 | `listeners` | (`type`: `any`) => `any` |
 | `off` | (`type`: `string` \| `RegExp`, `listener`: `Function`) => [`EventEmitter`](../classes/event_emitter.EventEmitter.md) |
-| `on` | (`type`: `string` \| `RegExp`, `listener`: `Function`) => [`EventEmitter`](../classes/event_emitter.EventEmitter.md) |
-| `once` | (`type`: `string` \| `RegExp`, `listener`: `Function`) => [`EventEmitter`](../classes/event_emitter.EventEmitter.md) |
+| `on` | (`type`: `string` \| `RegExp`, `listener`: `Function`, `index?`: `number`) => [`EventEmitter`](../classes/event_emitter.EventEmitter.md) |
+| `once` | (`type`: `string` \| `RegExp`, `listener`: `Function`, `index?`: `number`) => [`EventEmitter`](../classes/event_emitter.EventEmitter.md) |
 | `removeAllListeners` | (`type`: `string` \| `RegExp`) => [`EventEmitter`](../classes/event_emitter.EventEmitter.md) |
-| `setMaxListeners` | (`n`: `any`) => \{ on(type: string \| RegExp, listener: Function): EventEmitter; once(type: string \| RegExp, listener: Function): EventEmitter; ... 6 more ...; removeAllListeners(type: string \| RegExp): EventEmitter; } |
+| `setMaxListeners` | (`n`: `any`) => \{ on(type: string \| RegExp, listener: Function, index?: number): EventEmitter; once(type: string \| RegExp, listener: Function, index?: number): EventEmitter; ... 6 more ...; removeAllListeners(type: string \| RegExp): EventEmitter; } |
 
 #### Defined in
 
-[src/default-methods.js:14](https://github.com/snowyu/events-ex.js/blob/0aebeb6/src/default-methods.js#L14)
+[src/default-methods.js:14](https://github.com/snowyu/events-ex.js/blob/a6cce2d/src/default-methods.js#L14)
