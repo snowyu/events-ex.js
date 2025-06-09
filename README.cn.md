@@ -1,15 +1,6 @@
 ### events-ex [![npm](https://img.shields.io/npm/v/events-ex.svg)](https://npmjs.org/package/events-ex) [![downloads](https://img.shields.io/npm/dm/events-ex.svg)](https://npmjs.org/package/events-ex) [![license](https://img.shields.io/npm/l/events-ex.svg)](https://npmjs.org/package/events-ex)
 
-
 浏览器友好的增强的**事件**[能力][Ability]和类。 它主要是从 [event-emitter][event-emitter] 修改而来的。 本库可以为你的任何类添加(注入)**事件**[能力][Ability]。
-
-
-TODO: 异步事件,添加`emitAsync`方法. 没这么简单,因为要支持bubbling,所以必须顺序执行事件.
-将`bubbling`作为功能选项.如果没有启用,就可以乱发了.
-
-当关闭`bubbling`的时候,那么是否还需要用`event`对象传递.
-
-首先完成异步支持.已经完成.`emitAsync`方法已经加上.
 
 ### Features
 
@@ -32,7 +23,7 @@ TODO: 异步事件,添加`emitAsync`方法. 没这么简单,因为要支持bubbl
     * **`改变`**: `emit` 方法返回监听器回调函数的结果而不是成功状态。
     * **`改变`**: 监听器回调函数的 `this` 对象是 `Event Object` 事件对象而不是事件发射器对象。
       * 事件发射器对象被放入 `Event` 对象的 `target` 属性中。
-  * ⚡ 添加了`emitAsync`方法,确保所有异步监听器完成后再返回结果。
+  * ⚡ 添加了`emitAsync`方法,采用瀑布流式顺序执行异步事件,支持冒泡机制与中断。
     * 非常适合用于需要等待多个异步任务完成的场景（如数据验证、插件系统等）。
   * 事件监听器`on/once(event: string|RegExp, listener, index?:number)`
     * 📌 支持第三个参数 index（可选），允许你在监听器数组中指定插入位置。

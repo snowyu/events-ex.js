@@ -25,8 +25,8 @@ Browser-friendly enhanced event emitter [ability][Ability] and class. It's modif
       * The emitter object is put into the `target` property of the `Event` Object.
   * Adds async event emitting via `emitAsync` method.
   * ⚡ Added `emitAsync` Method:
-    * Ensures all async listeners complete before returning results.
-    * Ideal for scenarios requiring sequential async tasks (e.g., data validation, plugin systems).
+    * Ensures all async listeners are executed **sequentially** (in registration and bubbling order) before returning results.
+    * Ideal for scenarios requiring ordered async execution (e.g., middleware-style validation, plugin pipelines, state transitions).
   * Listener APIs: `on/once(event: string|RegExp, listener, index?: number)`
     * 📌 **Index Parameter** (Optional):
       * Allows specifying the insertion position in the listener array.
