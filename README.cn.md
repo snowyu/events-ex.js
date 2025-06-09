@@ -101,7 +101,6 @@ my.emit('event1');
 import {EventEmitter, states} from 'events-ex';
 import {isObject} from 'util-ex';
 
-states.ABORT = -1
 class MyDb extends EventEmitter {
   get(key) {
     // Demo the event object bubbling usage:
