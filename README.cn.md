@@ -23,7 +23,7 @@ TODO: 异步事件,添加`emitAsync`方法. 没这么简单,因为要支持bubbl
 ### 区别
 
 * 与 [Node 事件模块](https://nodejs.org/api/events.html) 的区别
-  * **`改变`**: 事件支持冒泡机制与中断
+  * 🔁 **`改变`**: 事件支持冒泡机制与中断
     * 事件对象(`Event Object`)作为监听器的 "this" 对象。
       * `result` 属性: 可选, 如果设置,则将该结果返回到事件发射器(`Event Emitter`)。
       * `stopped` 属性: 可选, 如果设置为 `true`，则会阻止剩余的监听器被执行。
@@ -32,7 +32,14 @@ TODO: 异步事件,添加`emitAsync`方法. 没这么简单,因为要支持bubbl
     * **`改变`**: `emit` 方法返回监听器回调函数的结果而不是成功状态。
     * **`改变`**: 监听器回调函数的 `this` 对象是 `Event Object` 事件对象而不是事件发射器对象。
       * 事件发射器对象被放入 `Event` 对象的 `target` 属性中。
-  * 添加了`emitAsync`方法,支持异步事件
+  * ⚡ 添加了`emitAsync`方法,确保所有异步监听器完成后再返回结果。
+    * 非常适合用于需要等待多个异步任务完成的场景（如数据验证、插件系统等）。
+  * 事件监听器`on/once(event: string|RegExp, listener, index?:number)`
+    * 📌 支持第三个参数 index（可选），允许你在监听器数组中指定插入位置。
+      * 对于需要精确控制监听器调用顺序的场景非常有用（如前置拦截逻辑）。
+    * 🧪 event 支持正则表达式匹配事件名
+      * 监听器可使用正则表达式绑定多个相关事件，提升灵活性。
+      * 适用于统一处理一类命名模式的事件（如日志、状态变更等）。
 * 与 [event-emitter](https://github.com/medikoo/event-emitter) 的区别
   * **`改变`**: 事件支持冒泡机制（如上所述）
   * 添加了默认最大监听器数量的类属性，以保持与 Node 事件模块的兼容性。
@@ -41,15 +48,23 @@ TODO: 异步事件,添加`emitAsync`方法. 没这么简单,因为要支持bubbl
   * 添加了 `listeners()` 方法，以保持与 Node 事件模块的兼容性。
   * 添加了 `listenerCount()` 类方法，以保持与 Node 事件模块的兼容性。
   * 添加了`emitAsync`方法,支持异步事件
+* 🔗 事件管道与统一：pipe() 与 unify()
+  * `pipe(source, target)`：将一个 emitter 的事件转发到另一个 emitter。
+  * `unify(emitter1, emitter2)`：双向同步事件流，适用于构建共享状态或通信桥梁。
+* 📦 丰富的工具函数
+  * 提供如 `allOff()`, `hasListeners()`, `listenerCount()` 等辅助函数，便于调试与管理事件生命周期。
+  * 有助于构建更健壮的事件驱动系统。
+* 🔌 模块化能力注入：`eventable()`
+  * 不必继承基类，可通过 eventable(MyClass) 将事件能力注入任意类。
+  * 支持配置只注入特定方法，避免污染原型链。
 
-注意: 时间内部引发错误不会中断通知，但是会在通知结束时 emit 错误事件(`emit('error', error, 'notify', eventName, listener, args)`)
+注意: 事件内部引发错误不会中断通知，但是会在通知结束时 emit 错误事件(`emit('error', error, 'notify', eventName, listener, args)`)
 
 ### 安装
 
-```
+```bash
 npm install events-ex@alpha
 ```
-
 
 ### 用法
 
