@@ -17,10 +17,11 @@ export function getEventableMethods(aClass) {
      * Adds a listener function to the specified event type.
      * @param {string|RegExp} type - The event type to listen for.
      * @param {Function} listener - The listener function to be called when the event is emitted.
+     * @param {number} [index] - The index at which to insert the listener. If not specified, the listener will be added at the end of the listeners array.
      * @returns {import('./event-emitter').EventEmitter} The EventEmitter instance to allow chaining.
      * @throws {TypeError} If the listener is not a function.
      */
-    on(type, listener) {
+    on(type, listener, index) {
       if (!isFunction(listener)) {throw new TypeError(listener + ' is not a function')}
       let data
       if (!this.hasOwnProperty('_events')) {
@@ -40,7 +41,11 @@ export function getEventableMethods(aClass) {
       if  (!data[type]) {
         data[type] = listener
       } else if (isObject(data[type])) {
-        data[type].push(listener)
+        if (typeof index === 'number') {
+          data[type].splice(index, 0, listener)
+        } else {
+          data[type].push(listener)
+        }
       } else {
         data[type] = [data[type], listener]
       }
@@ -69,10 +74,11 @@ export function getEventableMethods(aClass) {
      * Adds a one-time listener function to the specified event type.
      * @param {string|RegExp} type - The event type to listen for.
      * @param {Function} listener - The listener function to be called once when the event is emitted.
+     * @param {number} [index] - The index at which to insert the listener. If not specified, the listener will be added at the end of the listeners array.
      * @returns {import('./event-emitter').EventEmitter} The EventEmitter instance to allow chaining.
      * @throws {TypeError} If the listener is not a function.
      */
-    once(type, listener) {
+    once(type, listener, index) {
       if (!isFunction(listener)) {throw new TypeError(listener + ' is not a function' )}
       let fired = false
       const self = this
@@ -85,7 +91,7 @@ export function getEventableMethods(aClass) {
         }
       }
       _once.listener = listener
-      this.on(type, _once)
+      this.on(type, _once, index)
       return this
     },
 
