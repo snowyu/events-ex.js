@@ -28,8 +28,18 @@ export class EventEmitter {
    * @param {Function} listener - The listener function to be removed.
    * @returns {EventEmitter} The EventEmitter instance to allow chaining.
    * @throws {TypeError} If the listener is not a function.
+   * @see {@link removeListener}
    */
   off(eventName: string|RegExp, listener: ListenerCallbackFunc): EventEmitter;
+  /**
+   * Removes a listener function from the specified event type.
+   * @param {string|RegExp} type - The event type to remove the listener from.
+   * @param {Function} listener - The listener function to be removed.
+   * @returns {EventEmitter} The EventEmitter instance to allow chaining.
+   * @throws {TypeError} If the listener is not a function.
+   * @see {@link off}
+   */
+  removeListener(eventName: string|RegExp, listener: ListenerCallbackFunc): EventEmitter;
   /**
    * Emits the specified event type with the given arguments.
    * @param {...*} args - The event type followed by any number of arguments to be passed to the listener functions.
@@ -49,6 +59,13 @@ export class EventEmitter {
    * @returns {EventEmitter} - The event emitter with all listeners removed.
    */
   removeAllListeners(eventName?: string|RegExp): EventEmitter;
+  /**
+   * Sets the maximum number of listeners allowed for the event emitter.
+   *
+   * @param {number} n - The maximum number of listeners to set. Must be a positive integer.
+   * @returns {EventEmitter} The {@link EventEmitter} instance for method chaining.
+   * @throws {TypeError} If `n` is not a positive integer.
+   */
   setMaxListeners(n: number): EventEmitter;
   /**
    * Returns an array of functions that are registered to listen for the specified event.
