@@ -4,53 +4,57 @@ Browser-friendly enhanced event emitter [ability][Ability] and class. It's modif
 
 ### Features
 
-* Rewrite of the core architecture for improved performance and more powerful event-able ability
-* keep most compatible with [node events](nodejs.org/api/events.html) and [event-emitter][event-emitter]
-* Supports bubbling and interruption
-  * Hook-able event system for more control over event handling
-* Supports async event emitting via `emitAsync` method which will wait for all async listeners to complete before returning.
-* Subscribe events with regular expression
+* **Modular Event-able Ability**: Inject event capabilities into any class using `eventable(MyClass)` without forced inheritance.
+* **Core Event Enhancements**:
+  * **Bubbling & Interruption**: Full support for event propagation and mid-stream cancellation.
+  * **Listener Ordering**: Precise control via the optional `index` parameter in `on()` and `once()`.
+  * **Regex Subscription**: Subscribe to multiple events using Regular Expressions.
+  * **Hook-able System**: Intercept and modify event behavior at the core level.
+* **Advanced Asynchronous Features (Specific to `emitAsync`)**:
+  * **Configurable Concurrency**: Choose between **Serial** (default) and **Parallel** execution for async listeners.
+  * **Result Aggregation**: Strategies to gather return values: `last` (default), `first` (first success), and `collect` (all results).
+  * **Fluent API Proxies**: Use `.parallel()` and `.configure()` for transient, side-effect-free execution context.
+* **Architecture**: Rewritten core for improved performance and flexibility while maintaining broad compatibility.
+* **Event Utilities**: Built-in support for `pipe`, `pipeAsync`, `unify`, `allOff`, and `hasListeners`.
 
 ### Differences
 
-* Difference with [node events](https://nodejs.org/api/events.html)
+* **Difference with [node events](https://nodejs.org/api/events.html)**
   + **`broken change`**: The event supports bubbling and interruption
     + the `event object` as listener's "this" object:
       * `result`: If set, the result is returned to the `Event Emitter`.
       * `stopped`: If set to `true`, it prevents the remaining listeners from being executed.
       * `target`: The `Event Emitter` object, which was originally the `this` object.
       * `type`: triggered event type(name).
+      * `resolved`: (Async only) Indicates if a successful result has been found in `first` mode.
     * **`broken change`**: The `emit` return the result of listeners's callback function instead of the successful state.
     * **`broken change`**: The `this` object of listeners' callback function is the `Event` Object instead of the emitter object.
       * The emitter object is put into the `target` property of the `Event` Object.
-  * Adds async event emitting via `emitAsync` method.
-  * ⚡ Added `emitAsync` Method:
-    * Ensures all async listeners are executed **sequentially** (in registration and bubbling order) before returning results.
-    * Ideal for scenarios requiring ordered async execution (e.g., middleware-style validation, plugin pipelines, state transitions).
-  * Listener APIs: `on/once(event: string|RegExp, listener, index?: number)`
-    * 📌 **Index Parameter** (Optional):
-      * Allows specifying the insertion position in the listener array.
-      * Useful for precise control over listener execution order (e.g., pre-interception logic).
-    * 🧪 **Regex Event Matching**:
-      * Listeners can bind to multiple events via regex patterns.
-      * Great for handling events with naming patterns (e.g., logs, state changes).
-* Difference with [event-emitter](https://github.com/medikoo/event-emitter)
-  + **`broken change`**: The event supports bubbling and interruption(see above)
-  + Adds the defaultMaxListeners class property to keep compatibility with node events.
-  + Adds the setMaxListeners method to keep compatible with node events.
+  * ⚡ **Enhanced `emitAsync` Method (Unique to Async)**:
+    * **Sequential (Serial)**: Executes listeners one-by-one, respecting `this.stopped`.
+    * **Concurrent (Parallel)**: Executes all listeners simultaneously.
+    * **Result Strategies**:
+      * `last`: Returns the result of the final listener (or last to finish).
+      * `first`: Returns the first successful non-undefined result (skips errors).
+      * `collect`: Returns an array of all results in registration order.
+  * **Fluent Configuration**: Use `.parallel()` or `.configure({...})` for one-time customized async emits.
+  * **Listener APIs**: `on/once(event: string|RegExp, listener, index?: number)`
+    * 📌 **Index Parameter** (Optional): Allows specifying the insertion position in the listener array.
+    * 🧪 **Regex Event Matching**: Listeners can bind to multiple events via regex patterns.
+
+* **Difference with [event-emitter](https://github.com/medikoo/event-emitter)**
+  + **`broken change`**: The event supports bubbling and interruption (see above).
+  + Adds the `defaultMaxListeners` class property to keep compatibility with node events.
+  + Adds the `setMaxListeners` method to keep compatibility with node events.
   + Adds `error`, `newListener` and `removeListener` events to keep compatibility with node events.
-  + Adds listeners() method to keep compatibility with node events.
-  + Adds listenerCount() class method to keep compatibility with node events.
+  + Adds `listeners()` method to keep compatibility with node events.
+  + Adds `listenerCount()` class method to keep compatibility with node events.
   * Adds async event emitting via `emitAsync` method.
+
 * 🔗 **Event Piping & Unification**:
-  * `pipe(source, target)`: Forwards events from one emitter to another.
-  * `unify(emitter1, emitter2)`: Bi-directional event synchronization (e.g., shared state management).
-* 📦 **Utility Functions**:
-  * Includes `allOff()`, `hasListeners()`, `listenerCount()` for debugging and lifecycle management.
-  * Enhances robustness in event-driven architectures.
-* 🔌 **Modular Ability Injection**:
-  * `eventable(MyClass)`: Inject event capabilities into any class without inheritance.
-  * Configurable inclusion/exclusion of methods to avoid prototype pollution.
+  * `pipe(source, target)`: Sync event forwarding.
+  * `pipeAsync(source, target, options)`: Async forwarding with configurable concurrency and aggregation.
+  * `unify(emitter1, emitter2)`: Bi-directional synchronization.
 
 Note: The listener throw error should not broke the notification, but it will emit error(`emit('error', error, 'notify', eventName, listener, args)`) after notification.
 
@@ -62,7 +66,7 @@ npm install events-ex
 
 ### Usage
 
-Extends from `EventEmitter` class:
+#### Extends from `EventEmitter` class
 
 ```js
 import {EventEmitter} from 'events-ex';
@@ -70,7 +74,7 @@ import {EventEmitter} from 'events-ex';
 class MyClass extends EventEmitter {}
 ```
 
-Add/Inject the event-able [ability][Ability] to your class directly:
+#### Add/Inject the event-able [ability][Ability] to your class directly
 
 ```js
 import {eventable} from 'events-ex';
@@ -81,25 +85,32 @@ class MyClass extends MyRoot {}
 eventable(MyClass);
 ```
 
-Now, you can use events in your class:
+#### Core Feature: Listener Ordering (Index Parameter)
 
 ```js
-const my = new MyClass;
+const ee = new EventEmitter();
+ee.on('test', () => console.log('second'), 1);
+ee.on('test', () => console.log('first'), 0); // Insert at index 0
 
-my.on('event', function() {
-  console.log('event occur');
-});
-
-my.on(/^event/, function() {
-  console.log('regexp match multi events');
-});
-
-
-my.emit('event');
-my.emit('event1');
+ee.emit('test');
+// Output:
+// first
+// second
 ```
 
-Bubbling event usage:
+#### Core Feature: Regex Subscription
+
+```js
+const ee = new EventEmitter();
+ee.on(/^user\..*/, function(data) {
+  console.log(`Event ${this.type} triggered with`, data);
+});
+
+ee.emit('user.login', { id: 1 });
+ee.emit('user.logout', { id: 1 });
+```
+
+#### Core Feature: Bubbling & Interruption
 
 ```js
 import {EventEmitter, states} from 'events-ex';
@@ -107,7 +118,6 @@ import {isObject} from 'util-ex';
 
 class MyDb extends EventEmitter {
   get(key) {
-    // Demo the event object bubbling usage:
     let result = this.emit('getting', key)
     if(isObject(result)) {
       if (result.state === states.ABORT) return
@@ -119,48 +129,85 @@ class MyDb extends EventEmitter {
 
 let db = new MyDb
 db.on('getting', function(key){
-  result = myGet(key);
+  let result = myGet(key);
   if (result != null) {
-    // get the key succ
-    this.result = {
-      state: states.DONE,
-      result: result,
-    }
-    this.stopped = true // it will skip other listeners if true
+    this.result = { state: states.DONE, result: result }
+    this.stopped = true // Skip remaining listeners
   } else {
-    // you can abort to get key by default.
-    this.result = {state: states.ABORT};
-    // this.stopped = true // it will skip other listeners if true
+    this.result = { state: states.ABORT };
   }
 })
 ```
 
-event-emitter usage:
+#### Async-Only Features: Concurrency & Aggregation
 
-```javascript
+These features apply **only** to the `emitAsync` method.
 
-import {wrapEventEmitter as ee} from 'events-ex';
-
-class MyClass { /* .. */ };
-ee(MyClass.prototype); // All instances of MyClass will expose event-emitter interface
-
-const emitter = new MyClass();
-let listener;
-
-emitter.on('test', listener = function (args) {
-  // … react to 'test' event
+```js
+const ee = new EventEmitter();
+ee.on('task', async () => {
+  await sleep(100);
+  return 'result 1';
+});
+ee.on('task', async () => {
+  return 'result 2';
 });
 
-emitter.once('test', function (args) {
-  // … react to first 'test' event (invoked only once!)
-});
+// 1. Default (Serial): Executes sequentially, returns 'result 2'
+const res = await ee.emitAsync('task');
 
-emitter.emit('test', arg1, arg2/*…args*/); // Two above listeners invoked
-emitter.emit('test', arg1, arg2/*…args*/); // Only first listener invoked
+// 2. Parallel + Collect: Executes concurrently, returns ['result 1', 'result 2']
+const allResults = await ee.parallel('collect').emitAsync('task');
 
-emitter.off('test', listener);              // Removed first listener
-emitter.emit('test', arg1, arg2/*…args*/); // No listeners invoked
+// 3. Parallel + First: Executes concurrently, returns fastest success ('result 2')
+const firstResult = await ee.parallel('first').emitAsync('task');
 ```
+
+### Advanced Features
+
+#### Async Concurrency Engine (For `emitAsync` Only)
+
+| Option | Value | Description |
+| :--- | :--- | :--- |
+| **`asyncMode`** | `'serial'` | **(Default)** Listeners run one by one. Supports `this.stopped`. |
+| | `'parallel'` | Listeners run concurrently. `this.stopped` is ignored. |
+| **`resultMode`** | `'last'` | **(Default)** Returns the result of the last listener (or last to finish). |
+| | `'first'` | Returns the first **non-undefined** and **successful** result. Skips errors. |
+| | `'collect'` | Returns an array of all results in registration order. |
+
+#### Proxy Isolation (Fluent API)
+
+Calling `.parallel()` or `.configure()` returns a transient Proxy Object (`Object.create(this)`), allowing thread-safe, isolated configurations for specific emits.
+
+#### Safe Injection (AoP Compatibility) & Name Collisions
+
+When injecting event capabilities into an existing object or prototype via `wrapEventEmitter(target)` or `eventable(MyClass)`, a **minimal set** of methods is injected to minimize the risk of name collisions:
+
+- `on`, `once`, `off`
+- `emit`, `emitAsync`
+- `setEmitterOptions`
+
+⚠️ **Warning on Name Collisions**: If your target object already has methods with these names, they will be overwritten.
+
+**Solution: Method Renaming**
+You can use the `rename` option in `eventable` to map the emitter methods to custom names on your target:
+
+```js
+eventable(MyClass, {
+  rename: {
+    emitAsync: 'myEmitAsync',
+    on: 'addListener'
+  }
+});
+// Now use: inst.myEmitAsync('event')
+```
+
+**Full EventEmitter vs. Minimal Injection**
+
+- **Standalone**: Calling `ee()` or `new EventEmitter()` without a target returns a **full instance** containing all advanced methods (including `.parallel()`, `.configure()`, `.setMaxListeners()`, etc.).
+- **Injected**: Passing a target to `ee(target)` or using `eventable` performs a **minimal injection** to preserve the target's original footprint. Use `setEmitterOptions` on the target to access advanced async configurations.
+
+---
 
 ### API
 
@@ -169,100 +216,36 @@ emitter.emit('test', arg1, arg2/*…args*/); // No listeners invoked
 Add the event-able ability to the class directly.
 
 * `class`: the class to be injected the ability.
-* `options` *(object)*: optional options
-  * `include` *(string[]|string)*: only these emitter methods will be added to the class
-    * **NOTE:** static method should use the prefix '@' with name.
-  * `exclude` *(string[]|string)*: theses emitter methods would not be added to the class
-    * **NOTE:** static method should use the prefix '@' with name.
-  * `methods` *(object)*: hooked methods to the class
-    * key: the method name to hook.
-    * value: the new method function
-      * use `this.super()` to call the original method.
-      * `this.self` is the original `this` object.
-  * `classMethods` *(object)*: hooked class methods to the class
-
-```js
-  import {eventable} from 'events-ex'
-
-  class OtherClass {
-    exec() {console.log "my original exec"}
-  }
-
-  class MyClass {}
-    // only 'on', 'off', 'emit', 'emitAsync' and static methods 'listenerCount' added to the class
-  eventable(MyClass, include: ['on', 'off', 'emit', 'emitAsync', '@listenerCount'])
-
-  // add the eventable ability to OtherClass and inject the exec method of OtherClass.
-  eventable(OtherClass, {methods: {
-    exec() {
-      console.log("new exec")
-      this.super() //call the original method
-    }}
-  })
-```
-
-#### allOff(obj) _(events-ex/all-off)_
-
-**keep compatible only**: the `removeAllListeners` has already been buildin.
-
-Removes all listeners from given event emitter object
+* `options` _(object)_: optional options
+  * `include` _(string[]|string)_: only these emitter methods will be added to the class
+  * `exclude` _(string[]|string)_: theses emitter methods would not be added to the class
+  * `methods` _(object)_: hooked methods to the class
+  * `emitterOptions` _(object)_: default options for the emitter (e.g., `asyncMode`, `resultMode`).
+  * `rename` _(object)_: map the emitter methods to custom names on the class.
+    * key: original method name (e.g., 'on', 'emitAsync').
+    * value: new method name.
 
 #### hasListeners(obj[, name]) _(events-ex/has-listeners)_
 
-Whether object has some listeners attached to the object.
-When `name` is provided, it checks listeners for specific event name
-
 ```javascript
-import {hasListeners, wrapEventEmitter as ee} from 'events-ex/has-listeners';
+import {hasListeners, wrapEventEmitter as ee} from 'events-ex';
 var emitter = ee();
 var listener = function () {};
-
 hasListeners(emitter); // false
-
 emitter.on('foo', listener);
-hasListeners(emitter); // true
 hasListeners(emitter, 'foo'); // true
-hasListeners(emitter, 'bar'); // false
-
-emitter.off('foo', listener);
-hasListeners(emitter, 'foo'); // false
 ```
 
-#### pipe(source, target[, emitMethodName]) _(events-ex/pipe)_
+#### pipeAsync(source, target[, name, options]) _(events-ex/pipe-async)_
 
-Pipes all events from _source_ emitter onto _target_ emitter (all events from _source_ emitter will be emitted also on _target_ emitter, but not other way).
-Returns _pipe_ object which exposes `pipe.close` function. Invoke it to close configured _pipe_.
-It works internally by redefinition of `emit` method, if in your interface this method is referenced differently, provide its name (or symbol) with third argument.
+Creates an asynchronous pipeline.
 
-#### unify(emitter1, emitter2) _(events-ex/unify)_
+- `options.asyncMode`: Propagation mode (`'serial' | 'parallel'`).
+- `options.resultMode`: Aggregation strategy.
 
-Unifies event handling for two objects. Events emitted on _emitter1_ would be also emitter on _emitter2_, and other way back.
-Non reversible.
+#### setEmitterOptions(options)
 
-```javascript
-import {unify as eeUnify, wrapEventEmitter as ee} from 'events-ex';
-
-var emitter1 = ee(), listener1, listener3;
-var emitter2 = ee(), listener2, listener4;
-
-emitter1.on('test', listener1 = function () { });
-emitter2.on('test', listener2 = function () { });
-
-emitter1.emit('test'); // Invoked listener1
-emitter2.emit('test'); // Invoked listener2
-
-var unify = eeUnify(emitter1, emitter2);
-
-emitter1.emit('test'); // Invoked listener1 and listener2
-emitter2.emit('test'); // Invoked listener1 and listener2
-
-emitter1.on('test', listener3 = function () { });
-emitter2.on('test', listener4 = function () { });
-
-emitter1.emit('test'); // Invoked listener1, listener2, listener3 and listener4
-emitter2.emit('test'); // Invoked listener1, listener2, listener3 and listener4
-```
-
+Configures instance-wide defaults for `asyncMode`, `resultMode`, and `maxListeners`.
 
 [event-emitter]: https://github.com/medikoo/event-emitter
 [Ability]: https://github.com/snowyu/custom-ability.js

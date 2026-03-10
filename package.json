@@ -37,7 +37,7 @@
   "main": "./lib/index.js",
   "module": "./src/index.js",
   "dependencies": {
-    "custom-ability": "^2.0.1",
+    "custom-ability": "^2.1.0",
     "util-ex": "^2.0.0"
   },
   "devDependencies": {

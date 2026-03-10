@@ -4,98 +4,83 @@
 
 ### Features
 
-* 重写核心架构
-* 尽最大可能性与[node events][Node Events] and [event-emitter][event-emitter]保持兼容
-* 更强大的 event-able [能力][Ability]
-* 可挂载的事件系统, 用于更好地控制事件处理
-* 支持异步事件通过 `emitAsync` 方法,该方法会等待所有异步`listeners`处理完毕后返回结果
-* 支持正则表达式匹配订阅事件
+* **模块化 Event-able 能力**：通过 `eventable(MyClass)` 将事件功能注入任何类，无需强制继承。
+* **核心事件增强**：
+  * **冒泡与中断**：全面支持事件传播控制及中途取消。
+  * **监听器排序**：通过 `on()` 和 `once()` 的可选 `index` 参数精确控制执行顺序。
+  * **正则表达式订阅**：支持使用正则表达式订阅多个匹配的事件。
+  * **可挂载(Hook-able)系统**：允许在核心层面拦截并修改事件行为。
+* **高级异步特性 (仅针对 `emitAsync`)**：
+  * **可配置的并发性**：异步监听器支持 **顺序(Serial)**（默认）和 **并发(Parallel)** 执行。
+  * **结果聚合策略**：支持多种收集返回值的方式：`last`（默认）、`first`（首个成功结果）和 `collect`（所有结果）。
+  * **Fluent API 代理**：通过 `.parallel()` 和 `.configure()` 提供无副作用的临时执行上下文。
+* **架构优势**：重写核心以提升性能与灵活性，同时保持广泛的兼容性。
+* **事件工具集**：内置支持 `pipe`, `pipeAsync`, `unify`, `allOff` 和 `hasListeners`。
 
 ### 区别
 
-* 与 [Node 事件模块](https://nodejs.org/api/events.html) 的区别
+* **与 [Node 事件模块](https://nodejs.org/api/events.html) 的区别**
   * 🔁 **`改变`**: 事件支持冒泡机制与中断
     * 事件对象(`Event Object`)作为监听器的 "this" 对象。
       * `result` 属性: 可选, 如果设置,则将该结果返回到事件发射器(`Event Emitter`)。
       * `stopped` 属性: 可选, 如果设置为 `true`，则会阻止剩余的监听器被执行。
       * `target`属性: 事件发射器对象,原本的`this`
       * `type`属性: 触发的事件类型名称
+      * `resolved`: (仅异步) 在 `first` 模式下，标识是否已找到成功的结果。
     * **`改变`**: `emit` 方法返回监听器回调函数的结果而不是成功状态。
     * **`改变`**: 监听器回调函数的 `this` 对象是 `Event Object` 事件对象而不是事件发射器对象。
       * 事件发射器对象被放入 `Event` 对象的 `target` 属性中。
-  * ⚡ 添加了`emitAsync`方法,采用瀑布流式顺序执行异步事件,支持冒泡机制与中断。
-    * 非常适合用于需要等待多个异步任务完成的场景（如数据验证、插件系统等）。
-  * 事件监听器`on/once(event: string|RegExp, listener, index?:number)`
-    * 📌 支持第三个参数 index（可选），允许你在监听器数组中指定插入位置。
-      * 对于需要精确控制监听器调用顺序的场景非常有用（如前置拦截逻辑）。
-    * 🧪 event 支持正则表达式匹配事件名
-      * 监听器可使用正则表达式绑定多个相关事件，提升灵活性。
-      * 适用于统一处理一类命名模式的事件（如日志、状态变更等）。
-* 与 [event-emitter](https://github.com/medikoo/event-emitter) 的区别
-  * **`改变`**: 事件支持冒泡机制（如上所述）
+  * ⚡ **增强的 `emitAsync` 方法 (异步专用)**:
+    * **顺序模式 (Serial)**: 逐个执行监听器，尊重 `this.stopped` 中断(默认)。
+    * **并发模式 (Parallel)**: 同时执行所有监听器。
+    * **结果策略**:
+      * `last`: 返回最后一个（或最后完成的）监听器的结果。
+      * `first`: 返回第一个成功的非 undefined 结果（自动跳过错误）。
+      * `collect`: 按注册顺序以数组形式返回所有结果。
+  * **流式配置**: 使用 `.parallel()` 或 `.configure({...})` 进行单次定制化异步发射。
+  * **事件监听器 API**: `on/once(event: string|RegExp, listener, index?:number)`
+    * 📌 **Index 参数** (可选): 允许在监听器数组中指定插入位置。
+    * 🧪 **正则事件匹配**: 允许使用正则表达式绑定多个相关事件。
+
+* **与 [event-emitter](https://github.com/medikoo/event-emitter) 的区别**
+  * **`改变`**: 事件支持冒泡机制（如上所述）。
   * 添加了默认最大监听器数量的类属性，以保持与 Node 事件模块的兼容性。
   * 添加了 `setMaxListeners` 方法，以保持与 Node 事件模块的兼容性。
   * 添加了 `error`、`newListener` 和 `removeListener` 事件，以保持与 Node 事件模块的兼容性。
   * 添加了 `listeners()` 方法，以保持与 Node 事件模块的兼容性。
   * 添加了 `listenerCount()` 类方法，以保持与 Node 事件模块的兼容性。
-  * 添加了`emitAsync`方法,支持异步事件
-* 🔗 事件管道与统一：pipe() 与 unify()
-  * `pipe(source, target)`：将一个 emitter 的事件转发到另一个 emitter。
-  * `unify(emitter1, emitter2)`：双向同步事件流，适用于构建共享状态或通信桥梁。
-* 📦 丰富的工具函数
-  * 提供如 `allOff()`, `hasListeners()`, `listenerCount()` 等辅助函数，便于调试与管理事件生命周期。
-  * 有助于构建更健壮的事件驱动系统。
-* 🔌 模块化能力注入：`eventable()`
-  * 不必继承基类，可通过 eventable(MyClass) 将事件能力注入任意类。
-  * 支持配置只注入特定方法，避免污染原型链。
+  * 添加了`emitAsync`等方法,支持异步事件
 
-注意: 事件内部引发错误不会中断通知，但是会在通知结束时 emit 错误事件(`emit('error', error, 'notify', eventName, listener, args)`)
-
-### 安装
-
-```bash
-npm install events-ex@alpha
-```
+---
 
 ### 用法
 
-直接继承使用 `EventEmitter` 类
+#### 核心特性：监听器排序 (Index 参数)
 
 ```js
-import {EventEmitter} from 'events-ex';
+const ee = new EventEmitter();
+ee.on('test', () => console.log('second'), 1);
+ee.on('test', () => console.log('first'), 0); // 在索引 0 处插入
 
-class MyClass extends EventEmitter {}
+ee.emit('test');
+// 输出:
+// first
+// second
 ```
 
-直接添加/注入事件(event-able)[能力][Ability] 到你的类:
+#### 核心特性：正则表达式订阅
 
 ```js
-import {eventable} from 'events-ex';
-
-class MyClass extends MyRoot {}
-
-// inject the eventable ability to MyClass
-eventable(MyClass);
-```
-
-现在,可以在你的类中使用事件了:
-
-```js
-const my = new MyClass;
-
-my.on('event', function() {
-  console.log('event occur');
+const ee = new EventEmitter();
+ee.on(/^user\..*/, function(data) {
+  console.log(`事件 ${this.type} 触发，数据：`, data);
 });
 
-my.on(/^event/, function() {
-  console.log('regexp match multi events');
-});
-
-my.emit('event');
-my.emit('event1');
+ee.emit('user.login', { id: 1 });
+ee.emit('user.logout', { id: 1 });
 ```
 
-事件冒泡机制的使用:
+#### 核心特性：冒泡与中断示例
 
 ```js
 import {EventEmitter, states} from 'events-ex';
@@ -103,7 +88,6 @@ import {isObject} from 'util-ex';
 
 class MyDb extends EventEmitter {
   get(key) {
-    // Demo the event object bubbling usage:
     let result = this.emit('getting', key)
     if(isObject(result)) {
       if (result.state === states.ABORT) return
@@ -115,149 +99,107 @@ class MyDb extends EventEmitter {
 
 let db = new MyDb
 db.on('getting', function(key){
-  result = myGet(key);
+  let result = myGet(key);
   if (result != null) {
-    // get the key succ
-    this.result = {
-      state: states.DONE,
-      result: result,
-    }
-    this.stopped = true // it will skip other listeners if true
+    this.result = { state: states.DONE, result: result }
+    this.stopped = true // 停止后续监听器执行
   } else {
-    // you can abort to get key by default.
-    this.result = {state: states.ABORT};
-    // this.stopped = true // it will skip other listeners if true
+    this.result = { state: states.ABORT };
   }
 })
 ```
 
-event-emitter usage:
+#### 异步专用特性：并发与聚合
 
-```javascript
+这些特性**仅适用于** `emitAsync` 方法。
 
-import {wrapEventEmitter as ee} from 'events-ex';
-
-class MyClass { /* .. */ };
-ee(MyClass.prototype); // All instances of MyClass will expose event-emitter interface
-
-const emitter = new MyClass();
-let listener;
-
-emitter.on('test', listener = function (args) {
-  // … react to 'test' event
+```js
+const ee = new EventEmitter();
+ee.on('task', async () => {
+  await sleep(100);
+  return '结果 1';
+});
+ee.on('task', async () => {
+  return '结果 2';
 });
 
-emitter.once('test', function (args) {
-  // … react to first 'test' event (invoked only once!)
-});
+// 1. 默认 (串行)：顺序执行，返回 '结果 2'
+const res = await ee.emitAsync('task');
 
-emitter.emit('test', arg1, arg2/*…args*/); // Two above listeners invoked
-emitter.emit('test', arg1, arg2/*…args*/); // Only first listener invoked
+// 2. 并发 + 收集：并发执行，返回 ['结果 1', '结果 2']
+const allResults = await ee.parallel('collect').emitAsync('task');
 
-emitter.off('test', listener);              // Removed first listener
-emitter.emit('test', arg1, arg2/*…args*/); // No listeners invoked
+// 3. 并发 + 首个成功：并发执行，返回最快成功的 '结果 2'
+const firstResult = await ee.parallel('first').emitAsync('task');
 ```
+
+### 高级特性
+
+#### 异步并发引擎 (仅针对 `emitAsync`)
+
+| 选项 | 取值 | 说明 |
+| :--- | :--- | :--- |
+| **`asyncMode`** | `'serial'` | **(默认)** 监听器逐个运行。支持 `this.stopped` 中断。 |
+| | `'parallel'` | 监听器并发运行。忽略 `this.stopped`。 |
+| **`resultMode`** | `'last'` | **(默认)** 返回最后一个监听器的结果（并发模式下为最后一个完成的）。 |
+| | `'first'` | 返回第一个 **非 undefined** 且 **成功** 的结果。自动跳过错误。 |
+| | `'collect'` | 按注册顺序以数组形式返回所有监听器的结果。 |
+
+#### 代理隔离 (Fluent API)
+
+调用 `.parallel()` 或 `.configure()` 返回一个临时的代理对象 (`Object.create(this)`)，确保并发场景下的线程安全和配置隔离。
+
+#### 安全注入 (AoP 兼容性) 与命名冲突
+
+通过 `wrapEventEmitter(target)` 或 `eventable(MyClass)` 向现有对象或原型注入事件能力时，仅注入**最小方法集**以降低命名冲突风险：
+
+- `on`, `once`, `off`
+- `emit`, `emitAsync`
+- `setEmitterOptions`
+
+⚠️ **命名冲突警告**：如果您的目标对象已经拥有这些同名方法，它们将被覆盖。
+
+**解决方案：方法重命名 (Rename)**
+您可以利用 `eventable` 的 `rename` 选项将注入的方法映射为自定义名称：
+
+```js
+eventable(MyClass, {
+  rename: {
+    emitAsync: 'myEmitAsync',
+    on: 'addListener'
+  }
+});
+// 现在可以使用：inst.myEmitAsync('event')
+```
+
+**完整 EventEmitter 与 最小注入的区别**
+
+- **独立实例**：在不传递 `target` 参数的情况下调用 `ee()` 或 `new EventEmitter()`，将返回包含所有高级方法（包括 `.parallel()`, `.configure()`, `.setMaxListeners()` 等）的**完整实例**。
+- **注入模式**：向 `ee(target)` 传递目标对象或使用 `eventable` 时，会执行**最小化注入**以保持目标对象的原有精简结构。如果需要配置并行或聚合模式，请直接在目标对象上使用 `setEmitterOptions`。
+
+---
 
 ### API
 
 #### eventable(class[, options]) _(events-ex/eventable)_
 
-Add the event-able ability to the class directly.
+为类直接添加事件能力。
 
-* `class`: the class to be injected the ability.
-* `options` _(object)_: optional options
-  * `include` _(string[]|string)_: only these emitter methods will be added to the class
-    * **NOTE:** static method should use the prefix '@' with name.
-  * `exclude` _(string[]|string)_: theses emitter methods would not be added to the class
-    * **NOTE:** static method should use the prefix '@' with name.
-  * `methods` _(object)_: hooked methods to the class
-    * key: the method name to hook.
-    * value: the new method function
-      * use `this.super()` to call the original method.
-      * `this.self` is the original `this` object.
-  * `classMethods` _(object)_: hooked class methods to the class
+* `class`: 要注入能力的类。
+* `options`: 可选参数
+  * `include/exclude`: 包含/排除特定方法。
+  * `emitterOptions`: 发射器的默认配置（如 `asyncMode`, `resultMode`）。
+  * `rename` _(object)_: 将注入的方法映射为自定义名称。
+    * 键：原始方法名（如 'on', 'emitAsync'）。
+    * 值：重命名后的新名称。
 
-```coffee
-  eventable  = require('events-ex/eventable')
-  #OtherClass = require('OtherClass')
-  class OtherClass
-    exec: -> console.log "my original exec"
+#### pipeAsync(source, target[, name, options]) _(events-ex/pipe-async)_
 
-  class MyClass
-    # only 'on', 'off', 'emit' and static methods 'listenerCount' added to the class
-    eventable MyClass, include: ['on', 'off', 'emit', '@listenerCount']
+创建异步管道。支持配置传播模式和结果聚合策略。
 
-  # add the eventable ability to OtherClass and inject the exec method of OtherClass.
-  eventable OtherClass, methods:
-    exec: ->
-      console.log "new exec"
-      @super() # call the original method
-```
+#### setEmitterOptions(options)
 
-#### allOff(obj) _(events-ex/all-off)_
-
-**keep compatible only**: the `removeAllListeners` has already been buildin.
-
-Removes all listeners from given event emitter object
-
-#### hasListeners(obj[, name]) _(events-ex/has-listeners)_
-
-Whether object has some listeners attached to the object.
-When `name` is provided, it checks listeners for specific event name
-
-```javascript
-var emitter = ee();
-var hasListeners = require('events-ex/has-listeners');
-var listener = function () {};
-
-hasListeners(emitter); // false
-
-emitter.on('foo', listener);
-hasListeners(emitter); // true
-hasListeners(emitter, 'foo'); // true
-hasListeners(emitter, 'bar'); // false
-
-emitter.off('foo', listener);
-hasListeners(emitter, 'foo'); // false
-```
-
-#### pipe(source, target[, emitMethodName]) _(events-ex/pipe)_
-
-Pipes all events from _source_ emitter onto _target_ emitter (all events from _source_ emitter will be emitted also on _target_ emitter, but not other way).
-Returns _pipe_ object which exposes `pipe.close` function. Invoke it to close configured _pipe_.
-It works internally by redefinition of `emit` method, if in your interface this method is referenced differently, provide its name (or symbol) with third argument.
-
-#### unify(emitter1, emitter2) _(events-ex/unify)_
-
-Unifies event handling for two objects. Events emitted on _emitter1_ would be also emitter on _emitter2_, and other way back.
-Non reversible.
-
-```javascript
-var eeUnify = require('events-ex/unify');
-
-var emitter1 = ee(), listener1, listener3;
-var emitter2 = ee(), listener2, listener4;
-
-emitter1.on('test', listener1 = function () { });
-emitter2.on('test', listener2 = function () { });
-
-emitter1.emit('test'); // Invoked listener1
-emitter2.emit('test'); // Invoked listener2
-
-var unify = eeUnify(emitter1, emitter2);
-
-emitter1.emit('test'); // Invoked listener1 and listener2
-emitter2.emit('test'); // Invoked listener1 and listener2
-
-emitter1.on('test', listener3 = function () { });
-emitter2.on('test', listener4 = function () { });
-
-emitter1.emit('test'); // Invoked listener1, listener2, listener3 and listener4
-emitter2.emit('test'); // Invoked listener1, listener2, listener3 and listener4
-```
-
+配置实例级的默认选项。
 
 [event-emitter]: https://github.com/medikoo/event-emitter
-[Node Events]: https://nodejs.org/api/events.html
 [Ability]: https://github.com/snowyu/custom-ability.js
-

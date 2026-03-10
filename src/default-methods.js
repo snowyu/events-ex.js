@@ -1,4 +1,5 @@
 import {defineProperty, isArray, isFunction, isNumber, isObject, isRegExp as _isRegExp, isUndefined, isRegExpStr, toRegExp } from 'util-ex'
+import './util/promise-any'
 import {RegExpEventSymbol} from './consts'
 import {Event} from './event';
 
@@ -13,6 +14,50 @@ function isRegExp(value) {
 
 export function getEventableMethods(aClass) {
   return {
+    /**
+     * Configures the event emitter with specified options using a Fluent API.
+     * @param {Object} options - Configuration options for event emission.
+     * @param {string} [options.asyncMode='serial'] - The mode of asynchronous emission ('serial' or 'parallel').
+     * @param {string} [options.resultMode='last'] - The strategy for handling multiple return values ('last', 'first', 'collect').
+     * @returns {import('./event-emitter').EventEmitter} A proxy object representing the configured EventEmitter.
+     */
+    configure(options) {
+      const proxy = Object.create(this)
+      const mergedOptions = Object.assign({}, this._eeRuntimeOptions, options)
+      defineProperty(proxy, '_eeRuntimeOptions', mergedOptions)
+      return proxy
+    },
+
+    /**
+     * A shortcut for parallel configuration.
+     * @param {string} [resultMode='last'] - The strategy for handling multiple return values.
+     * @returns {import('./event-emitter').EventEmitter} A proxy object representing the configured EventEmitter.
+     */
+    parallel(resultMode) {
+      return this.configure({asyncMode: 'parallel', resultMode: resultMode || 'last'})
+    },
+
+    /**
+     * Sets the configuration options for the EventEmitter instance.
+     * @param {Object} options - Configuration options for the emitter (e.g., asyncMode, resultMode, maxListeners).
+     * @returns {import('./event-emitter').EventEmitter} The EventEmitter instance for chaining.
+     */
+    setEmitterOptions(options) {
+      if (!isObject(options)) {return this}
+      let data
+      if (!this.hasOwnProperty('_emitterOptions')) {
+        data = create(null)
+        defineProperty(this, '_emitterOptions', data)
+      } else {
+        data = this._emitterOptions
+      }
+      Object.assign(data, options)
+      if (!isUndefined(options.maxListeners) && isFunction(this.setMaxListeners)) {
+        this.setMaxListeners(options.maxListeners)
+      }
+      return this
+    },
+
     /**
      * Adds a listener function to the specified event type.
      * @param {string|RegExp} type - The event type to listen for.
@@ -143,22 +188,9 @@ export function getEventableMethods(aClass) {
       const args = r.args
       const listeners = r.listeners
       const evt = Event(this, r.type)
-      const errs = []
+      const options = Object.assign({}, this._emitterOptions, this._eeRuntimeOptions)
       try {
-        for (const listener of listeners) {
-          try {
-            await _notify(listener, evt, args);
-            if (evt.stopped) {break}
-          } catch(err) {
-            errs.push({err: err, listener: listener})
-          }
-        }
-        if (errs.length) {
-          for (let i=0;i<errs.length;i++) {
-            const it = errs[i]
-            this.emit('error', it.err, 'notify', r.type, it.listener, args)
-          }
-        }
+        await _executeAsync.call(this, listeners, evt, args, options)
       } finally {
         // eslint-disable-next-line no-unsafe-finally
         return evt.end()
@@ -380,4 +412,69 @@ function _notify(listener, evt, args) {
     }
   }
   return result
+}
+
+async function _executeAsync(listeners, evt, args, options) {
+  const asyncMode = options.asyncMode || 'serial'
+  const resultMode = options.resultMode || 'last'
+  const errs = []
+
+  if (resultMode === 'collect') {
+    evt.result = []
+  }
+
+  const notifyListener = async (listener) => {
+    try {
+      const result = await _notify(listener, evt, args)
+      if (result !== undefined) {
+        if (resultMode === 'first' && !evt.resolved) {
+          evt.result = result
+          evt.resolved = true
+        } else if (resultMode === 'last') {
+          evt.result = result
+        }
+      }
+      return result
+    } catch (err) {
+      errs.push({err, listener})
+      throw err
+    }
+  }
+
+  if (asyncMode === 'parallel') {
+    const promises = listeners.map(listener => notifyListener(listener))
+    if (resultMode === 'collect') {
+      evt.result = await Promise.all(promises.map(p => p.catch(() => undefined)))
+    } else if (resultMode === 'first') {
+      try {
+        await Promise.any(promises.map(p => p.then(res => res === undefined ? Promise.reject() : res)))
+      } catch (e) {
+        // If all rejected or returned undefined, ignore
+      }
+    } else {
+      await Promise.all(promises.map(p => p.catch(() => undefined)))
+    }
+  } else {
+    // Serial mode (default)
+    for (const listener of listeners) {
+      try {
+        const result = await notifyListener(listener)
+        if (resultMode === 'collect') {
+          evt.result.push(result)
+        }
+        if (evt.stopped || (resultMode === 'first' && evt.resolved)) break
+      } catch (err) {
+        if (resultMode === 'collect') {
+          evt.result.push(undefined)
+        }
+      }
+    }
+  }
+
+  if (errs.length) {
+    for (let i = 0; i < errs.length; i++) {
+      const it = errs[i]
+      this.emit('error', it.err, 'notify', evt.type, it.listener, args)
+    }
+  }
 }

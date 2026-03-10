@@ -31,6 +31,12 @@ Event.prototype.init = function(target, type) {
    */
   this.stopped = false
   /**
+   * Whether a result has been resolved (for 'first' result mode)
+   * @type {boolean}
+   * @public
+   */
+  this.resolved = false
+  /**
    * Keep your event result here if any.
    * @type {*}
    * @public

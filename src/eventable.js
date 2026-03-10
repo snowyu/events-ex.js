@@ -25,6 +25,9 @@ function getEventableClass(aClass) {
   Eventable.prototype.listenerCount = methods.listenerCount;
   Eventable.prototype.emit = methods.emit;
   Eventable.prototype.emitAsync = methods.emitAsync;
+  Eventable.prototype.configure = methods.configure;
+  Eventable.prototype.parallel = methods.parallel;
+  Eventable.prototype.setEmitterOptions = methods.setEmitterOptions;
   Eventable.prototype.on = methods.on;
   Eventable.prototype.addListener = methods.on;
   Eventable.prototype.off = methods.off;

@@ -36,7 +36,10 @@ describe('eventable', () => {
       'removeAllListeners',
       'once',
       'setMaxListeners',
-      'listeners'
+      'listeners',
+      'configure',
+      'parallel',
+      'setEmitterOptions',
     ].sort());
   });
 
@@ -54,7 +57,10 @@ describe('eventable', () => {
       'once',
       'off',
       'setMaxListeners',
-      'listeners'
+      'listeners',
+      'configure',
+      'parallel',
+      'setEmitterOptions',
     ].sort());
   });
 
@@ -71,7 +77,10 @@ describe('eventable', () => {
       'on',
       'off',
       'setMaxListeners',
-      'listeners'
+      'listeners',
+      'configure',
+      'parallel',
+      'setEmitterOptions',
     ].sort());
   });
 
