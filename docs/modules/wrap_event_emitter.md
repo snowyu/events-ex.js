@@ -30,13 +30,13 @@ Renames and re-exports [wrapEventEmitter](wrap_event_emitter.md#wrapeventemitter
 
 #### Defined in
 
-[src/wrap-event-emitter.js:7](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/wrap-event-emitter.js#L7)
+[src/wrap-event-emitter.js:7](https://github.com/snowyu/events-ex.js/blob/888e944/src/wrap-event-emitter.js#L7)
 
 ## Functions
 
 ### wrapEventEmitter
 
-▸ **wrapEventEmitter**(`o?`): `any`
+▸ **wrapEventEmitter**(`o?`, `options?`): `any`
 
 Create or inject the eventable instance into the object
 
@@ -45,6 +45,7 @@ Create or inject the eventable instance into the object
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `o?` | `any` | the optional instance to eventable |
+| `options?` | `any` | optional configuration for the emitter |
 
 #### Returns
 
@@ -54,4 +55,4 @@ o or new Event instance
 
 #### Defined in
 
-[src/wrap-event-emitter.js:34](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/wrap-event-emitter.js#L34)
+[src/wrap-event-emitter.js:37](https://github.com/snowyu/events-ex.js/blob/888e944/src/wrap-event-emitter.js#L37)

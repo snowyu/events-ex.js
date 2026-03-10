@@ -20,6 +20,7 @@
 - [unify](modules/unify.md)
 - [util/array-remove](modules/util_array_remove.md)
 - [util/object-for-each](modules/util_object_for_each.md)
+- [util/promise-any](modules/util_promise_any.md)
 - [util/string-pad](modules/util_string_pad.md)
 - [util/to-int](modules/util_to_int.md)
 - [util/valid-callable](modules/util_valid_callable.md)

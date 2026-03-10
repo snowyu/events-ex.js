@@ -46,4 +46,4 @@ Throws a TypeError if `obj` is null or undefined.
 
 #### Defined in
 
-[src/has-listeners.js:20](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/has-listeners.js#L20)
+[src/has-listeners.js:20](https://github.com/snowyu/events-ex.js/blob/888e944/src/has-listeners.js#L20)

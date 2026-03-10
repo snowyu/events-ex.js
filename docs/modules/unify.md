@@ -43,4 +43,4 @@ Unifies the event listeners of two event emitter objects so that they share the 
 
 #### Defined in
 
-[src/unify.js:17](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/unify.js#L17)
+[src/unify.js:17](https://github.com/snowyu/events-ex.js/blob/888e944/src/unify.js#L17)

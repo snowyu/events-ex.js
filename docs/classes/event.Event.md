@@ -12,6 +12,7 @@
 
 ### Properties
 
+- [resolved](event.Event.md#resolved)
 - [result](event.Event.md#result)
 - [stopped](event.Event.md#stopped)
 - [target](event.Event.md#target)
@@ -49,9 +50,21 @@ Event Object that contains information about the event, such as the target eleme
 
 #### Defined in
 
-[src/event.js:8](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event.js#L8)
+[src/event.js:8](https://github.com/snowyu/events-ex.js/blob/888e944/src/event.js#L8)
 
 ## Properties
+
+### resolved
+
+• **resolved**: `boolean`
+
+Whether a result has been resolved (for 'first' result mode)
+
+#### Defined in
+
+[src/event.js:38](https://github.com/snowyu/events-ex.js/blob/888e944/src/event.js#L38)
+
+___
 
 ### result
 
@@ -61,7 +74,7 @@ Keep your event result here if any.
 
 #### Defined in
 
-[src/event.js:38](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event.js#L38)
+[src/event.js:44](https://github.com/snowyu/events-ex.js/blob/888e944/src/event.js#L44)
 
 ___
 
@@ -73,7 +86,7 @@ Whether stop the bubbling event
 
 #### Defined in
 
-[src/event.js:32](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event.js#L32)
+[src/event.js:32](https://github.com/snowyu/events-ex.js/blob/888e944/src/event.js#L32)
 
 ___
 
@@ -85,7 +98,7 @@ Who trigger the event
 
 #### Defined in
 
-[src/event.js:26](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event.js#L26)
+[src/event.js:26](https://github.com/snowyu/events-ex.js/blob/888e944/src/event.js#L26)
 
 ___
 
@@ -97,7 +110,7 @@ The type of the event.
 
 #### Defined in
 
-[src/event.js:44](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event.js#L44)
+[src/event.js:50](https://github.com/snowyu/events-ex.js/blob/888e944/src/event.js#L50)
 
 ## Methods
 
@@ -115,7 +128,7 @@ The result of the event.
 
 #### Defined in
 
-[src/event.js:51](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event.js#L51)
+[src/event.js:57](https://github.com/snowyu/events-ex.js/blob/888e944/src/event.js#L57)
 
 ___
 
@@ -138,4 +151,4 @@ Initializes the event with the target object.
 
 #### Defined in
 
-[src/event.js:20](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event.js#L20)
+[src/event.js:20](https://github.com/snowyu/events-ex.js/blob/888e944/src/event.js#L20)

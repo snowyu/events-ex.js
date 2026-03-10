@@ -48,7 +48,7 @@ Class that represents an event emitter.
 
 #### Defined in
 
-[src/event-emitter.d.ts:7](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event-emitter.d.ts#L7)
+[src/event-emitter.d.ts:7](https://github.com/snowyu/events-ex.js/blob/888e944/src/event-emitter.d.ts#L7)
 
 ## Methods
 
@@ -73,7 +73,7 @@ The result of the event.
 
 #### Defined in
 
-[src/event-emitter.d.ts:48](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event-emitter.d.ts#L48)
+[src/event-emitter.d.ts:48](https://github.com/snowyu/events-ex.js/blob/888e944/src/event-emitter.d.ts#L48)
 
 ___
 
@@ -98,7 +98,7 @@ A promise that resolves with the result of the event.
 
 #### Defined in
 
-[src/event-emitter.d.ts:54](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event-emitter.d.ts#L54)
+[src/event-emitter.d.ts:54](https://github.com/snowyu/events-ex.js/blob/888e944/src/event-emitter.d.ts#L54)
 
 ___
 
@@ -122,7 +122,7 @@ Returns the count of listeners that are registered to listen for the specified e
 
 #### Defined in
 
-[src/event-emitter.d.ts:83](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event-emitter.d.ts#L83)
+[src/event-emitter.d.ts:83](https://github.com/snowyu/events-ex.js/blob/888e944/src/event-emitter.d.ts#L83)
 
 ___
 
@@ -146,7 +146,7 @@ Returns an array of functions that are registered to listen for the specified ev
 
 #### Defined in
 
-[src/event-emitter.d.ts:76](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event-emitter.d.ts#L76)
+[src/event-emitter.d.ts:76](https://github.com/snowyu/events-ex.js/blob/888e944/src/event-emitter.d.ts#L76)
 
 ___
 
@@ -179,7 +179,7 @@ If the listener is not a function.
 
 #### Defined in
 
-[src/event-emitter.d.ts:33](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event-emitter.d.ts#L33)
+[src/event-emitter.d.ts:33](https://github.com/snowyu/events-ex.js/blob/888e944/src/event-emitter.d.ts#L33)
 
 ___
 
@@ -208,7 +208,7 @@ If the listener is not a function.
 
 #### Defined in
 
-[src/event-emitter.d.ts:16](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event-emitter.d.ts#L16)
+[src/event-emitter.d.ts:16](https://github.com/snowyu/events-ex.js/blob/888e944/src/event-emitter.d.ts#L16)
 
 ___
 
@@ -237,7 +237,7 @@ If the listener is not a function.
 
 #### Defined in
 
-[src/event-emitter.d.ts:24](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event-emitter.d.ts#L24)
+[src/event-emitter.d.ts:24](https://github.com/snowyu/events-ex.js/blob/888e944/src/event-emitter.d.ts#L24)
 
 ___
 
@@ -261,7 +261,7 @@ Removes all listeners for a specific event or all events from an event emitter.
 
 #### Defined in
 
-[src/event-emitter.d.ts:61](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event-emitter.d.ts#L61)
+[src/event-emitter.d.ts:61](https://github.com/snowyu/events-ex.js/blob/888e944/src/event-emitter.d.ts#L61)
 
 ___
 
@@ -294,7 +294,7 @@ If the listener is not a function.
 
 #### Defined in
 
-[src/event-emitter.d.ts:42](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event-emitter.d.ts#L42)
+[src/event-emitter.d.ts:42](https://github.com/snowyu/events-ex.js/blob/888e944/src/event-emitter.d.ts#L42)
 
 ___
 
@@ -322,7 +322,7 @@ If `n` is not a positive integer.
 
 #### Defined in
 
-[src/event-emitter.d.ts:69](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event-emitter.d.ts#L69)
+[src/event-emitter.d.ts:69](https://github.com/snowyu/events-ex.js/blob/888e944/src/event-emitter.d.ts#L69)
 
 ___
 
@@ -349,4 +349,4 @@ use emitter.listenerCount instead
 
 #### Defined in
 
-[src/event-emitter.d.ts:91](https://github.com/snowyu/events-ex.js/blob/9c254b2/src/event-emitter.d.ts#L91)
+[src/event-emitter.d.ts:91](https://github.com/snowyu/events-ex.js/blob/888e944/src/event-emitter.d.ts#L91)
