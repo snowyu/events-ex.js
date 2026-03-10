@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.2.0](https://github.com/snowyu/events-ex.js/compare/v2.1.1...v2.2.0) (2026-03-10)
+
+
+### Features
+
+* enhance async event emission with parallel execution and result aggregation ([888e944](https://github.com/snowyu/events-ex.js/commit/888e944ce02d1b10248a710712048a8ee0216928))
+
 ## [2.1.1](https://github.com/snowyu/events-ex.js/compare/v2.1.0...v2.1.1) (2025-10-24)
 
 
