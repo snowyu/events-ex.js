@@ -10,18 +10,28 @@ export class EventEmitter {
    * Adds a listener function to the specified event type.
    * @param {string|RegExp} type - The event type to listen for.
    * @param {Function} listener - The listener function to be called when the event is emitted.
+   * @param {number|'first'|'last'} [index] - The index at which to insert the listener.
+   *        - 'first' or -Infinity: adds to the beginning of the listeners (stay at the front).
+   *        - 'last' or Infinity: adds to the end of the listeners (stay at the back).
+   *        - number: inserts at the specified index within the normal listeners zone.
+   *        If not specified, the listener will be added at the end of the normal listeners.
    * @returns {EventEmitter} The EventEmitter instance to allow chaining.
    * @throws {TypeError} If the listener is not a function.
    */
-  on(eventName: string|RegExp, listener: ListenerCallbackFunc): EventEmitter;
+  on(eventName: string|RegExp, listener: ListenerCallbackFunc, index?: number|'first'|'last'): EventEmitter;
   /**
    * Adds a one-time listener function to the specified event type.
    * @param {string|RegExp} type - The event type to listen for.
    * @param {Function} listener - The listener function to be called once when the event is emitted.
+   * @param {number|'first'|'last'} [index] - The index at which to insert the listener.
+   *        - 'first' or -Infinity: adds to the beginning of the listeners (stay at the front).
+   *        - 'last' or Infinity: adds to the end of the listeners (stay at the back).
+   *        - number: inserts at the specified index within the normal listeners zone.
+   *        If not specified, the listener will be added at the end of the normal listeners.
    * @returns {EventEmitter} The EventEmitter instance to allow chaining.
    * @throws {TypeError} If the listener is not a function.
    */
-  once(eventName: string|RegExp, listener: ListenerCallbackFunc): EventEmitter;
+  once(eventName: string|RegExp, listener: ListenerCallbackFunc, index?: number|'first'|'last'): EventEmitter;
   /**
    * Removes a listener function from the specified event type.
    * @param {string|RegExp} type - The event type to remove the listener from.

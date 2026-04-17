@@ -7,7 +7,7 @@
 * **模块化 Event-able 能力**：通过 `eventable(MyClass)` 将事件功能注入任何类，无需强制继承。
 * **核心事件增强**：
   * **冒泡与中断**：全面支持事件传播控制及中途取消。
-  * **监听器排序**：通过 `on()` 和 `once()` 的可选 `index` 参数精确控制执行顺序。
+  * **监听器排序**：通过 `on()` 和 `once()` 的可选 `index` 参数精确控制执行顺序。支持特殊值 `'first'` 和 `'last'` 以确保监听器始终保持在边界。
   * **正则表达式订阅**：支持使用正则表达式订阅多个匹配的事件。
   * **可挂载(Hook-able)系统**：允许在核心层面拦截并修改事件行为。
 * **高级异步特性 (仅针对 `emitAsync`)**：
@@ -38,8 +38,11 @@
       * `first`: 返回第一个成功的非 undefined 结果（自动跳过错误）。
       * `collect`: 按注册顺序以数组形式返回所有结果。
   * **流式配置**: 使用 `.parallel()` 或 `.configure({...})` 进行单次定制化异步发射。
-  * **事件监听器 API**: `on/once(event: string|RegExp, listener, index?:number)`
-    * 📌 **Index 参数** (可选): 允许在监听器数组中指定插入位置。
+  * **事件监听器 API**: `on/once(event: string|RegExp, listener, index?: number|'first'|'last')`
+    * 📌 **Index 参数** (可选): 在监听器数组中指定插入位置。 
+      * `'first'` (`-Infinity`): 始终保持在 **Head** 区。先注册的 `'first'` 监听器排在最前面。
+      * `'last'` (`Infinity`): 始终保持在 **Tail** 区。先注册为 `'last'` 的监听器将始终位于数组的绝对末尾。
+      * `number`: 常规 **Body** 区内的相对索引。
     * 🧪 **正则事件匹配**: 允许使用正则表达式绑定多个相关事件。
 
 * **与 [event-emitter](https://github.com/medikoo/event-emitter) 的区别**
@@ -59,13 +62,17 @@
 
 ```js
 const ee = new EventEmitter();
-ee.on('test', () => console.log('second'), 1);
-ee.on('test', () => console.log('first'), 0); // 在索引 0 处插入
+ee.on('test', () => console.log('third'));
+ee.on('test', () => console.log('first'), 'first'); // 始终在最前
+ee.on('test', () => console.log('last'), 'last');   // 始终在最后
+ee.on('test', () => console.log('second'), 1);      // 常规区域索引 1 (相对于 Head)
 
 ee.emit('test');
 // 输出:
 // first
 // second
+// third
+// last
 ```
 
 #### 核心特性：正则表达式订阅

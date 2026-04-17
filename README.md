@@ -7,7 +7,7 @@ Browser-friendly enhanced event emitter [ability][Ability] and class. It's modif
 * **Modular Event-able Ability**: Inject event capabilities into any class using `eventable(MyClass)` without forced inheritance.
 * **Core Event Enhancements**:
   * **Bubbling & Interruption**: Full support for event propagation and mid-stream cancellation.
-  * **Listener Ordering**: Precise control via the optional `index` parameter in `on()` and `once()`.
+  * **Listener Ordering**: Precise control via the optional `index` parameter in `on()` and `once()`. Supports special values `'first'` and `'last'` to ensure listeners stay at the boundaries.
   * **Regex Subscription**: Subscribe to multiple events using Regular Expressions.
   * **Hook-able System**: Intercept and modify event behavior at the core level.
 * **Advanced Asynchronous Features (Specific to `emitAsync`)**:
@@ -38,8 +38,11 @@ Browser-friendly enhanced event emitter [ability][Ability] and class. It's modif
       * `first`: Returns the first successful non-undefined result (skips errors).
       * `collect`: Returns an array of all results in registration order.
   * **Fluent Configuration**: Use `.parallel()` or `.configure({...})` for one-time customized async emits.
-  * **Listener APIs**: `on/once(event: string|RegExp, listener, index?: number)`
-    * 📌 **Index Parameter** (Optional): Allows specifying the insertion position in the listener array.
+  * **Listener APIs**: `on/once(event: string|RegExp, listener, index?: number|'first'|'last')`
+    * 📌 **Index Parameter** (Optional): Insertion position in the listener array. 
+      * `'first'` (`-Infinity`): Stays in the **Head** zone. The first listener added as `'first'` is placed at the very front.
+      * `'last'` (`Infinity`): Stays in the **Tail** zone. The first listener added as `'last'` will always remain at the absolute end.
+      * `number`: Relative index within the **Body** zone.
     * 🧪 **Regex Event Matching**: Listeners can bind to multiple events via regex patterns.
 
 * **Difference with [event-emitter](https://github.com/medikoo/event-emitter)**
@@ -89,13 +92,17 @@ eventable(MyClass);
 
 ```js
 const ee = new EventEmitter();
-ee.on('test', () => console.log('second'), 1);
-ee.on('test', () => console.log('first'), 0); // Insert at index 0
+ee.on('test', () => console.log('third'));
+ee.on('test', () => console.log('first'), 'first'); // Always at the front
+ee.on('test', () => console.log('last'), 'last');   // Always at the end
+ee.on('test', () => console.log('second'), 1);      // Body index 1 (relative to Head)
 
 ee.emit('test');
 // Output:
 // first
 // second
+// third
+// last
 ```
 
 #### Core Feature: Regex Subscription

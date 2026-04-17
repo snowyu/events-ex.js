@@ -62,7 +62,11 @@ export function getEventableMethods(aClass) {
      * Adds a listener function to the specified event type.
      * @param {string|RegExp} type - The event type to listen for.
      * @param {Function} listener - The listener function to be called when the event is emitted.
-     * @param {number} [index] - The index at which to insert the listener. If not specified, the listener will be added at the end of the listeners array.
+     * @param {number|'first'|'last'} [index] - The index at which to insert the listener. 
+     *        - 'first' or -Infinity: Adds to the "Head" zone. The first listener added as 'first' is placed at the very front.
+     *        - 'last' or Infinity: Adds to the "Tail" zone. The first listener added as 'last' will always be the very last one to execute.
+     *        - number: Inserts at the specified index within the "Body" (normal) zone.
+     *        If not specified, the listener is added to the end of the "Body" zone.
      * @returns {import('./event-emitter').EventEmitter} The EventEmitter instance to allow chaining.
      * @throws {TypeError} If the listener is not a function.
      */
@@ -83,16 +87,38 @@ export function getEventableMethods(aClass) {
       if (isRegExp(type)) {
         data = data[RegExpEventSymbol] || (data[RegExpEventSymbol] = create(null))
       }
-      if  (!data[type]) {
-        data[type] = listener
-      } else if (isObject(data[type])) {
-        if (typeof index === 'number') {
-          data[type].splice(index, 0, listener)
+
+      const isFirst = index === 'first' || index === -Infinity
+      const isLast = index === 'last' || index === Infinity
+
+      if (!data[type]) {
+        if (isFirst || isLast || typeof index === 'number') {
+          data[type] = [listener]
+          if (isFirst) data[type]._headCount = 1
+          if (isLast) data[type]._tailCount = 1
         } else {
-          data[type].push(listener)
+          data[type] = listener
         }
       } else {
-        data[type] = [data[type], listener]
+        if (isFunction(data[type])) {
+          data[type] = [data[type]]
+        }
+        const listeners = data[type]
+        const headCount = listeners._headCount || 0
+        const tailCount = listeners._tailCount || 0
+
+        if (isFirst) {
+          listeners.splice(headCount, 0, listener)
+          listeners._headCount = headCount + 1
+        } else if (isLast) {
+          listeners.splice(listeners.length - tailCount, 0, listener)
+          listeners._tailCount = tailCount + 1
+        } else if (typeof index === 'number' && !isNaN(index)) {
+          const pos = Math.min(Math.max(headCount + index, headCount), listeners.length - tailCount)
+          listeners.splice(pos, 0, listener)
+        } else {
+          listeners.splice(listeners.length - tailCount, 0, listener)
+        }
       }
       // Check for listener leak
       if (isObject(data[type]) && !data[type].warned) {
@@ -119,7 +145,11 @@ export function getEventableMethods(aClass) {
      * Adds a one-time listener function to the specified event type.
      * @param {string|RegExp} type - The event type to listen for.
      * @param {Function} listener - The listener function to be called once when the event is emitted.
-     * @param {number} [index] - The index at which to insert the listener. If not specified, the listener will be added at the end of the listeners array.
+     * @param {number|'first'|'last'} [index] - The index at which to insert the listener.
+     *        - 'first' or -Infinity: Adds to the "Head" zone. The first listener added as 'first' is placed at the very front.
+     *        - 'last' or Infinity: Adds to the "Tail" zone. The first listener added as 'last' will always be the very last one to execute.
+     *        - number: Inserts at the specified index within the "Body" (normal) zone.
+     *        If not specified, the listener is added to the end of the "Body" zone.
      * @returns {import('./event-emitter').EventEmitter} The EventEmitter instance to allow chaining.
      * @throws {TypeError} If the listener is not a function.
      */
@@ -275,10 +305,16 @@ export function getEventableMethods(aClass) {
           if (candidate === listener || candidate.listener === listener) {break}
         }
         if (i < 0) {return this}
+
+        if (listeners._headCount && i < listeners._headCount) {
+          listeners._headCount--
+        } else if (listeners._tailCount && i >= listeners.length - listeners._tailCount) {
+          listeners._tailCount--
+        }
+
         if (listeners.length === 1) {
-          listeners.length = 0
           delete data[type]
-        } else if (listeners.length === 2) {
+        } else if (listeners.length === 2 && !listeners._headCount && !listeners._tailCount) {
           data[type] = listeners[(i ? 0 : 1)]
           listeners.length = 1
         } else {
