@@ -8,7 +8,7 @@
 
 > **allOff**(`emitter`, `type?`): [`EventEmitter`](../../event-emitter/classes/EventEmitter.md)
 
-Defined in: [src/all-off.js:12](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/all-off.js#L12)
+Defined in: [src/all-off.js:12](https://github.com/snowyu/events-ex.js/blob/f6c44157ffda17957fad5ad2e0aedbb8ec521be7/src/all-off.js#L12)
 
 Removes all listeners for a specific event or all events from an event emitter.
 

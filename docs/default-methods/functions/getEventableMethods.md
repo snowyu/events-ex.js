@@ -8,7 +8,7 @@
 
 > **getEventableMethods**(`aClass`): `object`
 
-Defined in: [src/default-methods.js:15](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/default-methods.js#L15)
+Defined in: [src/default-methods.js:15](https://github.com/snowyu/events-ex.js/blob/f6c44157ffda17957fad5ad2e0aedbb8ec521be7/src/default-methods.js#L15)
 
 ## Parameters
 
@@ -172,7 +172,7 @@ The listener function to be called when the event is emitted.
 
 ##### index?
 
-The index at which to insert the listener. 
+The index at which to insert the listener.
        - 'first' or -Infinity: Adds to the "Head" zone. The first listener added as 'first' is placed at the very front.
        - 'last' or Infinity: Adds to the "Tail" zone. The first listener added as 'last' will always be the very last one to execute.
        - number: Inserts at the specified index within the "Body" (normal) zone.
