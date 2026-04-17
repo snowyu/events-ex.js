@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.3.0](https://github.com/snowyu/events-ex.js/compare/v2.2.0...v2.3.0) (2026-04-17)
+
+
+### Features
+
+* support special index values 'first' and 'last' for listener ordering ([53cfb5b](https://github.com/snowyu/events-ex.js/commit/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a))
+
 ## [2.3.0](https://github.com/snowyu/events-ex.js/compare/v2.2.0...v2.3.0) (2025-05-15)
 
 ### Features
