@@ -62,7 +62,7 @@ export function getEventableMethods(aClass) {
      * Adds a listener function to the specified event type.
      * @param {string|RegExp} type - The event type to listen for.
      * @param {Function} listener - The listener function to be called when the event is emitted.
-     * @param {number|'first'|'last'} [index] - The index at which to insert the listener. 
+     * @param {number|'first'|'last'} [index] - The index at which to insert the listener.
      *        - 'first' or -Infinity: Adds to the "Head" zone. The first listener added as 'first' is placed at the very front.
      *        - 'last' or Infinity: Adds to the "Tail" zone. The first listener added as 'last' will always be the very last one to execute.
      *        - number: Inserts at the specified index within the "Body" (normal) zone.
@@ -88,8 +88,8 @@ export function getEventableMethods(aClass) {
         data = data[RegExpEventSymbol] || (data[RegExpEventSymbol] = create(null))
       }
 
-      const isFirst = index === 'first' || index === -Infinity
-      const isLast = index === 'last' || index === Infinity
+      const isFirst = index === -Infinity || index === 'first'
+      const isLast = index === Infinity || index === 'last'
 
       if (!data[type]) {
         if (isFirst || isLast || typeof index === 'number') {
