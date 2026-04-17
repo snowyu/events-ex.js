@@ -8,7 +8,7 @@
 
 > **toInt**(`value`): `any`
 
-Defined in: [src/util/to-int.js:2](https://github.com/snowyu/events-ex.js/blob/fb077063a0ea7231fa89bf74a09be2f52f8401e4/src/util/to-int.js#L2)
+Defined in: [src/util/to-int.js:2](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/util/to-int.js#L2)
 
 ## Parameters
 

@@ -8,7 +8,7 @@
 
 > **hasListeners**(`obj`, `type?`): `boolean`
 
-Defined in: [src/has-listeners.js:20](https://github.com/snowyu/events-ex.js/blob/fb077063a0ea7231fa89bf74a09be2f52f8401e4/src/has-listeners.js#L20)
+Defined in: [src/has-listeners.js:20](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/has-listeners.js#L20)
 
 Checks if an object has event listeners.
 

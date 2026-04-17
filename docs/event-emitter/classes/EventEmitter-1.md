@@ -6,7 +6,7 @@
 
 # Class: EventEmitter
 
-Defined in: [src/event-emitter.js:8](https://github.com/snowyu/events-ex.js/blob/fb077063a0ea7231fa89bf74a09be2f52f8401e4/src/event-emitter.js#L8)
+Defined in: [src/event-emitter.js:8](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/event-emitter.js#L8)
 
 ## Classdesc
 
@@ -18,7 +18,7 @@ Class that represents an event emitter.
 
 > **new EventEmitter**(): `EventEmitter`
 
-Defined in: [src/event-emitter.js:8](https://github.com/snowyu/events-ex.js/blob/fb077063a0ea7231fa89bf74a09be2f52f8401e4/src/event-emitter.js#L8)
+Defined in: [src/event-emitter.js:8](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/event-emitter.js#L8)
 
 #### Returns
 

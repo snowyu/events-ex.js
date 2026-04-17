@@ -6,7 +6,7 @@
 
 # Class: Event
 
-Defined in: [src/event.js:8](https://github.com/snowyu/events-ex.js/blob/fb077063a0ea7231fa89bf74a09be2f52f8401e4/src/event.js#L8)
+Defined in: [src/event.js:8](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/event.js#L8)
 
 Creates a new Event object instance that contains information about the event, such as the target element and the return value of the event.
 
@@ -24,7 +24,7 @@ Who trigger the event
 
 > **new Event**(`target`, `type`): `Event`
 
-Defined in: [src/event.js:8](https://github.com/snowyu/events-ex.js/blob/fb077063a0ea7231fa89bf74a09be2f52f8401e4/src/event.js#L8)
+Defined in: [src/event.js:8](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/event.js#L8)
 
 Creates a new Event object instance that contains information about the event, such as the target element and the return value of the event.
 
@@ -56,7 +56,7 @@ Event Object that contains information about the event, such as the target eleme
 
 > **resolved**: `boolean`
 
-Defined in: [src/event.js:38](https://github.com/snowyu/events-ex.js/blob/fb077063a0ea7231fa89bf74a09be2f52f8401e4/src/event.js#L38)
+Defined in: [src/event.js:38](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/event.js#L38)
 
 Whether a result has been resolved (for 'first' result mode)
 
@@ -66,7 +66,7 @@ Whether a result has been resolved (for 'first' result mode)
 
 > **result**: `any`
 
-Defined in: [src/event.js:44](https://github.com/snowyu/events-ex.js/blob/fb077063a0ea7231fa89bf74a09be2f52f8401e4/src/event.js#L44)
+Defined in: [src/event.js:44](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/event.js#L44)
 
 Keep your event result here if any.
 
@@ -76,7 +76,7 @@ Keep your event result here if any.
 
 > **stopped**: `boolean`
 
-Defined in: [src/event.js:32](https://github.com/snowyu/events-ex.js/blob/fb077063a0ea7231fa89bf74a09be2f52f8401e4/src/event.js#L32)
+Defined in: [src/event.js:32](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/event.js#L32)
 
 Whether stop the bubbling event
 
@@ -86,7 +86,7 @@ Whether stop the bubbling event
 
 > **target**: `any`
 
-Defined in: [src/event.js:26](https://github.com/snowyu/events-ex.js/blob/fb077063a0ea7231fa89bf74a09be2f52f8401e4/src/event.js#L26)
+Defined in: [src/event.js:26](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/event.js#L26)
 
 Who trigger the event
 
@@ -96,7 +96,7 @@ Who trigger the event
 
 > **type**: `string`
 
-Defined in: [src/event.js:50](https://github.com/snowyu/events-ex.js/blob/fb077063a0ea7231fa89bf74a09be2f52f8401e4/src/event.js#L50)
+Defined in: [src/event.js:50](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/event.js#L50)
 
 The type of the event.
 
@@ -106,7 +106,7 @@ The type of the event.
 
 > **end**(): `any`
 
-Defined in: [src/event.js:57](https://github.com/snowyu/events-ex.js/blob/fb077063a0ea7231fa89bf74a09be2f52f8401e4/src/event.js#L57)
+Defined in: [src/event.js:57](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/event.js#L57)
 
 Ends the event and returns the result.
 
@@ -122,7 +122,7 @@ The result of the event.
 
 > **init**(`target`, `type`): `void`
 
-Defined in: [src/event.js:20](https://github.com/snowyu/events-ex.js/blob/fb077063a0ea7231fa89bf74a09be2f52f8401e4/src/event.js#L20)
+Defined in: [src/event.js:20](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/event.js#L20)
 
 Initializes the event with the target object.
 

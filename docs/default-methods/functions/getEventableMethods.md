@@ -8,7 +8,7 @@
 
 > **getEventableMethods**(`aClass`): `object`
 
-Defined in: [src/default-methods.js:15](https://github.com/snowyu/events-ex.js/blob/fb077063a0ea7231fa89bf74a09be2f52f8401e4/src/default-methods.js#L15)
+Defined in: [src/default-methods.js:15](https://github.com/snowyu/events-ex.js/blob/53cfb5bb3f7229cb549e99d410c0d6d39665eb0a/src/default-methods.js#L15)
 
 ## Parameters
 
@@ -172,9 +172,13 @@ The listener function to be called when the event is emitted.
 
 ##### index?
 
-`number`
+The index at which to insert the listener. 
+       - 'first' or -Infinity: Adds to the "Head" zone. The first listener added as 'first' is placed at the very front.
+       - 'last' or Infinity: Adds to the "Tail" zone. The first listener added as 'last' will always be the very last one to execute.
+       - number: Inserts at the specified index within the "Body" (normal) zone.
+       If not specified, the listener is added to the end of the "Body" zone.
 
-The index at which to insert the listener. If not specified, the listener will be added at the end of the listeners array.
+`number` | `"first"` | `"last"`
 
 #### Returns
 
@@ -208,9 +212,13 @@ The listener function to be called once when the event is emitted.
 
 ##### index?
 
-`number`
+The index at which to insert the listener.
+       - 'first' or -Infinity: Adds to the "Head" zone. The first listener added as 'first' is placed at the very front.
+       - 'last' or Infinity: Adds to the "Tail" zone. The first listener added as 'last' will always be the very last one to execute.
+       - number: Inserts at the specified index within the "Body" (normal) zone.
+       If not specified, the listener is added to the end of the "Body" zone.
 
-The index at which to insert the listener. If not specified, the listener will be added at the end of the listeners array.
+`number` | `"first"` | `"last"`
 
 #### Returns
 
