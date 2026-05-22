@@ -1,6 +1,6 @@
 import {defineProperty, isArray, isFunction, isNumber, isObject, isRegExp as _isRegExp, isUndefined, isRegExpStr, toRegExp } from 'util-ex'
 import './util/promise-any'
-import {RegExpEventSymbol} from './consts'
+import {RegExpEventSymbol, createAbortError} from './consts'
 import {Event} from './event';
 
 const create          = Object.create
@@ -213,16 +213,21 @@ export function getEventableMethods(aClass) {
      * @returns {Promise<*>} A promise that resolves with the result of the event.
      */
     async emitAsync(/* type, msg , ... */) {
+      const options = Object.assign({}, this._emitterOptions, this._eeRuntimeOptions)
+      if (options.signal && options.signal.aborted) {
+        throw createAbortError()
+      }
       const r = _emit.apply(this, arguments)
       if (!r) {return}
       const args = r.args
       const listeners = r.listeners
       const evt = Event(this, r.type)
-      const options = Object.assign({}, this._emitterOptions, this._eeRuntimeOptions)
       try {
         await _executeAsync.call(this, listeners, evt, args, options)
-      } finally {
-        // eslint-disable-next-line no-unsafe-finally
+        return evt.end()
+      } catch (err) {
+        if (err && err.name === 'AbortError') throw err
+        // Other unexpected errors: still return the event result
         return evt.end()
       }
     },
@@ -450,9 +455,32 @@ function _notify(listener, evt, args) {
   return result
 }
 
+/**
+ * Executes all listener promises in parallel and assigns the result to evt.
+ * @param {Promise[]} promises - The listener promises to execute.
+ * @param {import('./event').Event} evt - The event object.
+ * @param {string} resultMode - 'last', 'first', or 'collect'.
+ */
+async function _runParallelListeners(promises, evt, resultMode) {
+  if (resultMode === 'collect') {
+    const wrapped = promises.map(p => p.catch(() => undefined))
+    const results = await Promise.all(wrapped)
+    evt.result = results
+  } else if (resultMode === 'first') {
+    try {
+      await Promise.any(promises.map(p => p.then(res => res === undefined ? Promise.reject() : res)))
+    } catch (e) {
+      // If all rejected or returned undefined, ignore
+    }
+  } else {
+    await Promise.all(promises.map(p => p.catch(() => undefined)))
+  }
+}
+
 async function _executeAsync(listeners, evt, args, options) {
   const asyncMode = options.asyncMode || 'serial'
   const resultMode = options.resultMode || 'last'
+  const signal = options.signal
   const errs = []
 
   if (resultMode === 'collect') {
@@ -479,20 +507,33 @@ async function _executeAsync(listeners, evt, args, options) {
 
   if (asyncMode === 'parallel') {
     const promises = listeners.map(listener => notifyListener(listener))
-    if (resultMode === 'collect') {
-      evt.result = await Promise.all(promises.map(p => p.catch(() => undefined)))
-    } else if (resultMode === 'first') {
-      try {
-        await Promise.any(promises.map(p => p.then(res => res === undefined ? Promise.reject() : res)))
-      } catch (e) {
-        // If all rejected or returned undefined, ignore
-      }
+    const runParallel = () => _runParallelListeners(promises, evt, resultMode)
+
+    if (signal) {
+      const abortPromise = new Promise((_, reject) => {
+        if (signal.aborted) {
+          evt.aborted = true
+          reject(createAbortError())
+          return
+        }
+        signal.addEventListener('abort', () => {
+          evt.aborted = true
+          reject(createAbortError())
+        }, { once: true })
+      })
+      await Promise.race([runParallel(), abortPromise])
     } else {
-      await Promise.all(promises.map(p => p.catch(() => undefined)))
+      await runParallel()
     }
   } else {
-    // Serial mode (default)
+    // Serial mode
     for (const listener of listeners) {
+      // Check AbortSignal before firing the next listener
+      if (signal && signal.aborted) {
+        evt.aborted = true
+        break
+      }
+
       try {
         const result = await notifyListener(listener)
         if (resultMode === 'collect') {
@@ -512,5 +553,9 @@ async function _executeAsync(listeners, evt, args, options) {
       const it = errs[i]
       this.emit('error', it.err, 'notify', evt.type, it.listener, args)
     }
+  }
+
+  if (evt.aborted) {
+    throw createAbortError()
   }
 }

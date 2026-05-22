@@ -31,6 +31,12 @@ Event.prototype.init = function(target, type) {
    */
   this.stopped = false
   /**
+   * Whether the event emission was aborted via AbortSignal.
+   * @type {boolean}
+   * @public
+   */
+  this.aborted = false
+  /**
    * Whether a result has been resolved (for 'first' result mode)
    * @type {boolean}
    * @public

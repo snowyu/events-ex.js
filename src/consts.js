@@ -11,3 +11,12 @@ export const states = {
 }
 
 export const RegExpEventSymbol = typeof Symbol === 'function' ? Symbol('RegExpEvent') : '@@RegExpEvent'
+
+/**
+ * Creates an AbortError with name 'AbortError'.
+ * Ensures a fresh Error instance each call for proper stack traces.
+ * @returns {Error}
+ */
+export function createAbortError() {
+  return Object.assign(new Error('The operation was aborted'), { name: 'AbortError' })
+}

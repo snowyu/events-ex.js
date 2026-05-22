@@ -59,6 +59,9 @@ export function pipeAsync(e1, e2/* , name, options */) {
       return fn.apply(target, args)
     }
 
+    // Read signal from source emitter's runtime options, if configured
+    const signal = this._eeRuntimeOptions && this._eeRuntimeOptions.signal
+
     if (asyncMode === 'parallel') {
       const promises = [emit.apply(this, arguments)]
       for (let i = 0; i < data.length; ++i) {
@@ -72,6 +75,8 @@ export function pipeAsync(e1, e2/* , name, options */) {
       const mainResult = await emit.apply(this, arguments)
       const allResults = [mainResult]
       for (let i = 0; i < data.length; ++i) {
+        // Check signal before forwarding to each pipe target in serial mode
+        if (signal && signal.aborted) break
         const res = await forward(data[i], arguments)
         allResults.push(res)
       }

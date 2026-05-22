@@ -14,6 +14,7 @@
   * **可配置的并发性**：异步监听器支持 **顺序(Serial)**（默认）和 **并发(Parallel)** 执行。
   * **结果聚合策略**：支持多种收集返回值的方式：`last`（默认）、`first`（首个成功结果）和 `collect`（所有结果）。
   * **Fluent API 代理**：通过 `.parallel()` 和 `.configure()` 提供无副作用的临时执行上下文。
+  * **AbortSignal 支持**：通过 `configure({ signal })` 支持取消异步事件发射，也可用于 `oncePromise`。
 * **架构优势**：重写核心以提升性能与灵活性，同时保持广泛的兼容性。
 * **事件工具集**：内置支持 `pipe`, `pipeAsync`, `oncePromise`, `unify`, `allOff` 和 `hasListeners`。
 
@@ -24,6 +25,7 @@
     * 事件对象(`Event Object`)作为监听器的 "this" 对象。
       * `result` 属性: 可选, 如果设置,则将该结果返回到事件发射器(`Event Emitter`)。
       * `stopped` 属性: 可选, 如果设置为 `true`，则会阻止剩余的监听器被执行。
+      * `aborted` 属性: (仅异步) `true` 表示事件发射被 `AbortSignal` 取消。
       * `target`属性: 事件发射器对象,原本的`this`
       * `type`属性: 触发的事件类型名称
       * `resolved`: (仅异步) 在 `first` 模式下，标识是否已找到成功的结果。
@@ -39,7 +41,7 @@
       * `collect`: 按注册顺序以数组形式返回所有结果。
   * **流式配置**: 使用 `.parallel()` 或 `.configure({...})` 进行单次定制化异步发射。
   * **事件监听器 API**: `on/once(event: string|RegExp, listener, index?: number|'first'|'last')`
-    * 📌 **Index 参数** (可选): 在监听器数组中指定插入位置。 
+    * 📌 **Index 参数** (可选): 在监听器数组中指定插入位置。
       * `'first'` (`-Infinity`): 始终保持在 **Head** 区。先注册的 `'first'` 监听器排在最前面。
       * `'last'` (`Infinity`): 始终保持在 **Tail** 区。先注册为 `'last'` 的监听器将始终位于数组的绝对末尾。
       * `number`: 常规 **Body** 区内的相对索引。
@@ -140,6 +142,44 @@ const allResults = await ee.parallel('collect').emitAsync('task');
 const firstResult = await ee.parallel('first').emitAsync('task');
 ```
 
+#### AbortSignal 支持（仅针对异步）
+
+通过 `configure({ signal })` 或 `oncePromise` 的 `options` 参数支持标准的 `AbortSignal`，可取消异步事件发射。
+
+```js
+const emitter = new EventEmitter();
+const controller = new AbortController();
+
+emitter.on('task', async () => {
+  await sleep(500);
+  return '完成';
+});
+
+// emitAsync: 通过 configure 传递 signal
+setTimeout(() => controller.abort(), 200); // 200ms 后取消
+try {
+  await emitter.configure({ signal: controller.signal }).emitAsync('task');
+} catch (err) {
+  console.log(err.name); // 'AbortError'
+}
+
+// oncePromise: 通过 options 直接传递 signal
+const c2 = new AbortController();
+setTimeout(() => c2.abort(), 100);
+try {
+  await oncePromise(emitter, 'ready', { signal: c2.signal });
+} catch (err) {
+  console.log(err.name); // 'AbortError'
+}
+```
+
+**行为说明**：
+
+- **串行模式 (Serial)**：每个 listener 执行前检查 `signal.aborted`，触发则立即中断并抛出 `AbortError`。
+- **并发模式 (Parallel)**：用 `Promise.race` 将 listener 执行与 signal 竞速，signal 触发立即抛出 `AbortError`。
+- **pipeAsync**：串行模式下，向每个 pipe target 转发前检查 source 的 signal，已 abort 则跳过后续 targets。
+- `Event` 对象新增 `aborted` 字段，独立于 `stopped`，用于追踪取消状态。
+
 ### 高级特性
 
 #### 异步并发引擎 (仅针对 `emitAsync`)
@@ -151,6 +191,7 @@ const firstResult = await ee.parallel('first').emitAsync('task');
 | **`resultMode`** | `'last'` | **(默认)** 返回最后一个监听器的结果（并发模式下为最后一个完成的）。 |
 | | `'first'` | 返回第一个 **非 undefined** 且 **成功** 的结果。自动跳过错误。 |
 | | `'collect'` | 按注册顺序以数组形式返回所有监听器的结果。 |
+| **`signal`** | `AbortSignal` | 通过 `AbortController` 创建的信号，用于取消异步事件发射。仅在 `configure()` 中传递，不会固化到实例上。 |
 
 #### 代理隔离 (Fluent API)
 
@@ -204,13 +245,16 @@ eventable(MyClass, {
 
 创建异步管道。支持配置传播模式和结果聚合策略。
 
-#### oncePromise(emitter, type) _(events-ex/once-promise)_
+#### oncePromise(emitter, type[, options]) _(events-ex/once-promise)_
 
 返回一个 `Promise`，当指定事件在 emitter 上触发时，resolve 并传入 **Event 对象**。
 如果 emitter 触发了 `error` 事件（且等待的事件不是 `error`），则 Promise reject。
+如果提供的 `AbortSignal` 被取消，则 Promise reject 并抛出 `AbortError`。
 
-- `emitter` *(EventEmitter)*: 要监听的事件发射器。
-- `type` *(string | RegExp)*: 要等待的事件类型。支持正则表达式匹配多个事件。
+- `emitter` _(EventEmitter)_: 要监听的事件发射器。
+- `type` _(string | RegExp)_: 要等待的事件类型。支持正则表达式匹配多个事件。
+- `options` _(Object)_: 可选配置。
+  - `signal` _(AbortSignal)_: 用于取消等待的 AbortSignal。
 - 返回: `Promise<Event>` — resolve 时传入 Event 对象，包含 `type`、`target` 等属性。
 
 > 注意：返回的 Event 对象中的 `result` 字段可能不是最终值（如果还有其他监听器尚未执行）。如需获取 emit 的最终返回值，请直接使用 `emit()` 或 `emitAsync()`。
@@ -241,6 +285,17 @@ try {
 // 等待 'error' 事件会正常 resolve
 ee.emit('error', new Error('预期的错误'));
 await oncePromise(ee, 'error'); // 正常 resolve，不会 reject
+
+// 配合 AbortSignal 实现超时取消
+const controller = new AbortController();
+setTimeout(() => controller.abort(), 5000);
+try {
+  const evt = await oncePromise(ee, 'response', { signal: controller.signal });
+} catch (err) {
+  if (err.name === 'AbortError') {
+    console.log('等待超时或被取消');
+  }
+}
 ```
 
 #### setEmitterOptions(options)
