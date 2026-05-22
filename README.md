@@ -15,7 +15,7 @@ Browser-friendly enhanced event emitter [ability][Ability] and class. It's modif
   * **Result Aggregation**: Strategies to gather return values: `last` (default), `first` (first success), and `collect` (all results).
   * **Fluent API Proxies**: Use `.parallel()` and `.configure()` for transient, side-effect-free execution context.
 * **Architecture**: Rewritten core for improved performance and flexibility while maintaining broad compatibility.
-* **Event Utilities**: Built-in support for `pipe`, `pipeAsync`, `unify`, `allOff`, and `hasListeners`.
+* **Event Utilities**: Built-in support for `pipe`, `pipeAsync`, `oncePromise`, `unify`, `allOff`, and `hasListeners`.
 
 ### Differences
 
@@ -249,6 +249,45 @@ Creates an asynchronous pipeline.
 
 - `options.asyncMode`: Propagation mode (`'serial' | 'parallel'`).
 - `options.resultMode`: Aggregation strategy.
+
+#### oncePromise(emitter, type) _(events-ex/once-promise)_
+
+Returns a `Promise` that resolves with the **Event object** when the specified event is emitted on the given emitter.
+If an `error` event is emitted (and the waiting event is not `error`), the promise rejects.
+
+- `emitter` *(EventEmitter)*: The event emitter to listen on.
+- `type` *(string | RegExp)*: The event type to wait for. Supports regex for matching multiple events.
+- Returns: `Promise<Event>` — resolves with the Event object, which provides `type`, `target`, etc.
+
+> Note: The resolved Event object's `result` field may not be the final value if other listeners have not yet run. For the definitive emit return value, use `emit()` or `emitAsync()` directly.
+
+```js
+import {oncePromise, EventEmitter} from 'events-ex';
+
+const ee = new EventEmitter();
+
+// Wait for a data event
+setTimeout(() => ee.emit('data', { id: 1 }), 100);
+const evt = await oncePromise(ee, 'data');
+console.log(evt.type);   // 'data'
+console.log(evt.target); // the emitter
+
+// Wait for a regex-matched event – evt.type reveals the actual event
+setTimeout(() => ee.emit('user.login', { name: 'Alice' }), 100);
+const evt2 = await oncePromise(ee, /^user\./);
+console.log(evt2.type); // 'user.login' (not the regex)
+
+// Error handling: rejects on error (unless waiting for 'error')
+try {
+  await oncePromise(ee, 'data');
+} catch (err) {
+  console.error('Error occurred:', err);
+}
+
+// Waiting for 'error' event resolves normally
+ee.emit('error', new Error('expected'));
+await oncePromise(ee, 'error'); // resolves, not rejects
+```
 
 #### setEmitterOptions(options)
 

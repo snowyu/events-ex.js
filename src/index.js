@@ -9,6 +9,7 @@ export * from './event-emitter'
 export * from './has-listeners'
 export * from './pipe'
 export * from './pipe-async'
+export * from './once-promise'
 export * from './unify'
 export * from './wrap-event-emitter'
 

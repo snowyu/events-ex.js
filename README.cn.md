@@ -15,7 +15,7 @@
   * **结果聚合策略**：支持多种收集返回值的方式：`last`（默认）、`first`（首个成功结果）和 `collect`（所有结果）。
   * **Fluent API 代理**：通过 `.parallel()` 和 `.configure()` 提供无副作用的临时执行上下文。
 * **架构优势**：重写核心以提升性能与灵活性，同时保持广泛的兼容性。
-* **事件工具集**：内置支持 `pipe`, `pipeAsync`, `unify`, `allOff` 和 `hasListeners`。
+* **事件工具集**：内置支持 `pipe`, `pipeAsync`, `oncePromise`, `unify`, `allOff` 和 `hasListeners`。
 
 ### 区别
 
@@ -203,6 +203,45 @@ eventable(MyClass, {
 #### pipeAsync(source, target[, name, options]) _(events-ex/pipe-async)_
 
 创建异步管道。支持配置传播模式和结果聚合策略。
+
+#### oncePromise(emitter, type) _(events-ex/once-promise)_
+
+返回一个 `Promise`，当指定事件在 emitter 上触发时，resolve 并传入 **Event 对象**。
+如果 emitter 触发了 `error` 事件（且等待的事件不是 `error`），则 Promise reject。
+
+- `emitter` *(EventEmitter)*: 要监听的事件发射器。
+- `type` *(string | RegExp)*: 要等待的事件类型。支持正则表达式匹配多个事件。
+- 返回: `Promise<Event>` — resolve 时传入 Event 对象，包含 `type`、`target` 等属性。
+
+> 注意：返回的 Event 对象中的 `result` 字段可能不是最终值（如果还有其他监听器尚未执行）。如需获取 emit 的最终返回值，请直接使用 `emit()` 或 `emitAsync()`。
+
+```js
+import {oncePromise, EventEmitter} from 'events-ex';
+
+const ee = new EventEmitter();
+
+// 等待 data 事件
+setTimeout(() => ee.emit('data', { id: 1 }), 100);
+const evt = await oncePromise(ee, 'data');
+console.log(evt.type);   // 'data'
+console.log(evt.target); // 发射器对象
+
+// 等待正则匹配的事件 – evt.type 会告诉你实际触发的事件类型
+setTimeout(() => ee.emit('user.login', { name: 'Alice' }), 100);
+const evt2 = await oncePromise(ee, /^user\./);
+console.log(evt2.type); // 'user.login' (而非正则表达式)
+
+// 错误处理：触发 error 时会 reject（除非等待的就是 'error'）
+try {
+  await oncePromise(ee, 'data');
+} catch (err) {
+  console.error('发生错误:', err);
+}
+
+// 等待 'error' 事件会正常 resolve
+ee.emit('error', new Error('预期的错误'));
+await oncePromise(ee, 'error'); // 正常 resolve，不会 reject
+```
 
 #### setEmitterOptions(options)
 
