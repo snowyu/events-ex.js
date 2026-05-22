@@ -4,7 +4,7 @@ import {createAbortError} from './consts'
 
 /**
  * Returns a Promise that resolves with the Event object when the specified event is emitted on the given emitter.
- * If an 'error' event is emitted (and the waiting event is not 'error'), the promise rejects.
+ * If an 'error' event is emitted (and the waiting event is not 'error'), the promise rejects by default.
  * If the provided AbortSignal is aborted, the promise rejects with an AbortError.
  *
  * Note: The resolved Event object's `result` field may not be the final value if other listeners have not yet run.
@@ -14,6 +14,9 @@ import {createAbortError} from './consts'
  * @param {string|RegExp} type - The event type to wait for.
  * @param {Object} [options] - Optional configuration.
  * @param {AbortSignal} [options.signal] - An AbortSignal to cancel the wait.
+ * @param {boolean|null} [options.raiseError] - Controls behavior when an 'error' event is emitted:
+ *   - `true` / `undefined` (default): The promise rejects with the error.
+ *   - `false`: The promise resolves with the error object instead of rejecting.
  * @returns {Promise<import('./event').Event>} - A promise that resolves with the Event object.
  * @throws {TypeError} - If emitter is not a valid event emitter object.
  */
@@ -21,6 +24,7 @@ export function oncePromise(emitter, type, options) {
   validObject(emitter)
 
   const signal = options && options.signal
+  const raiseError = options && options.raiseError
 
   return new Promise((resolve, reject) => {
     let onAbort = null
@@ -58,7 +62,11 @@ export function oncePromise(emitter, type, options) {
 
     function onError(err) {
       cleanup()
-      reject(err)
+      if (raiseError === false) {
+        resolve(err) // resolve with the error instead of rejecting
+      } else {
+        reject(err) // true | null | undefined → reject
+      }
     }
 
     emitter.on(type, onEvent)

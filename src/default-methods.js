@@ -19,6 +19,12 @@ export function getEventableMethods(aClass) {
      * @param {Object} options - Configuration options for event emission.
      * @param {string} [options.asyncMode='serial'] - The mode of asynchronous emission ('serial' or 'parallel').
      * @param {string} [options.resultMode='last'] - The strategy for handling multiple return values ('last', 'first', 'collect').
+     * @param {AbortSignal} [options.signal] - An AbortSignal to cancel async event emission.
+     * @param {boolean|null} [options.raiseError] - Controls error handling behavior:
+     *   - `true`: Always throw listener errors immediately.
+     *   - `false`: Silently swallow listener errors.
+     *   - `null`: Throw only for 'error' events with no error listeners (Node.js default).
+     *   - `undefined` (default): Same as `false` for emitAsync.
      * @returns {import('./event-emitter').EventEmitter} A proxy object representing the configured EventEmitter.
      */
     configure(options) {
@@ -39,7 +45,7 @@ export function getEventableMethods(aClass) {
 
     /**
      * Sets the configuration options for the EventEmitter instance.
-     * @param {Object} options - Configuration options for the emitter (e.g., asyncMode, resultMode, maxListeners).
+     * @param {Object} options - Configuration options for the emitter (e.g., asyncMode, resultMode, maxListeners, raiseError).
      * @returns {import('./event-emitter').EventEmitter} The EventEmitter instance for chaining.
      */
     setEmitterOptions(options) {
@@ -183,6 +189,8 @@ export function getEventableMethods(aClass) {
       const listeners = r.listeners
       const evt = Event(this, r.type)
       const errs = []
+      const opts = _getOptions(this)
+      let _throwErr
       try {
         let i = 0
         let listener
@@ -191,6 +199,7 @@ export function getEventableMethods(aClass) {
             _notify(listener, evt, args)
             if (evt.stopped) {break}
           } catch(err) {
+            if (opts.raiseError === true) {throw err}
             errs.push({err: err, listener: listener})
           }
           ++i
@@ -202,9 +211,13 @@ export function getEventableMethods(aClass) {
           }
         }
       } finally {
-        // eslint-disable-next-line no-unsafe-finally
-        return evt.end()
+        if (r.type === 'error' && opts.raiseError === null) {
+          const err = args[0]
+          _throwErr = err instanceof Error ? err : new Error(UnCAUGHT_ERR)
+        }
       }
+      if (_throwErr) throw _throwErr
+      return evt.end()
     },
 
     /**
@@ -222,14 +235,21 @@ export function getEventableMethods(aClass) {
       const args = r.args
       const listeners = r.listeners
       const evt = Event(this, r.type)
+      let _throwErr
       try {
         await _executeAsync.call(this, listeners, evt, args, options)
-        return evt.end()
       } catch (err) {
         if (err && err.name === 'AbortError') throw err
+        if (options.raiseError === true) throw err
         // Other unexpected errors: still return the event result
         return evt.end()
       }
+      if (r.type === 'error' && options.raiseError === null) {
+        const err = args[0]
+        _throwErr = err instanceof Error ? err : new Error(UnCAUGHT_ERR)
+      }
+      if (_throwErr) throw _throwErr
+      return evt.end()
     },
 
     setMaxListeners(n) {
@@ -391,6 +411,16 @@ export function getEventableMethods(aClass) {
 
 export default getEventableMethods
 
+/**
+ * Merges instance-level emitter options with per-call runtime options.
+ * Runtime options (set via configure()) take precedence.
+ * @param {Object} self - The emitter instance.
+ * @returns {Object} Merged options.
+ */
+function _getOptions(self) {
+  return Object.assign({}, self._emitterOptions, self._eeRuntimeOptions)
+}
+
 function _emit(type, msg) {
   const data = this._events
   let listeners
@@ -404,8 +434,22 @@ function _emit(type, msg) {
       args.push(msg)
     }
   }
+  if (type === 'error') {
+    const opts = _getOptions(this)
+    // raiseError: true → always throw, bypass listener dispatch
+    if (opts.raiseError === true) {
+      if (!(msg instanceof Error)) {msg = new Error(msg ? UnCAUGHT_ERR + msg : UnCAUGHT_ERR)}
+      throw msg
+    }
+  }
   // If there is no 'error' event listener then throw.
   if (!listeners && type === 'error') {
+    const opts = _getOptions(this)
+    // raiseError: false → silently return, never throw
+    if (opts.raiseError === false) {
+      return
+    }
+    // raiseError: undefined / null → Node.js default behavior
     if (!(msg instanceof Error)) {msg = new Error(msg ? UnCAUGHT_ERR + msg : UnCAUGHT_ERR)}
     throw msg
   }
@@ -456,6 +500,28 @@ function _notify(listener, evt, args) {
 }
 
 /**
+ * Creates a promise that rejects with AbortError when the given AbortSignal fires.
+ * Sets evt.aborted = true before rejecting.
+ * @param {AbortSignal} signal - The abort signal to listen on.
+ * @param {import('./event').Event} evt - The event object to mark as aborted.
+ * @returns {Promise<never>} A promise that rejects with AbortError on abort.
+ */
+function _createAbortPromise(signal, evt) {
+  return new Promise((_, reject) => {
+    if (signal.aborted) {
+      evt.aborted = true
+      reject(createAbortError())
+      return
+    }
+    const onAbort = () => {
+      evt.aborted = true
+      reject(createAbortError())
+    }
+    signal.addEventListener('abort', onAbort, { once: true })
+  })
+}
+
+/**
  * Executes all listener promises in parallel and assigns the result to evt.
  * @param {Promise[]} promises - The listener promises to execute.
  * @param {import('./event').Event} evt - The event object.
@@ -500,6 +566,7 @@ async function _executeAsync(listeners, evt, args, options) {
       }
       return result
     } catch (err) {
+      if (options.raiseError === true) {throw err}
       errs.push({err, listener})
       throw err
     }
@@ -507,26 +574,33 @@ async function _executeAsync(listeners, evt, args, options) {
 
   if (asyncMode === 'parallel') {
     const promises = listeners.map(listener => notifyListener(listener))
-    const runParallel = () => _runParallelListeners(promises, evt, resultMode)
 
-    if (signal) {
-      const abortPromise = new Promise((_, reject) => {
-        if (signal.aborted) {
-          evt.aborted = true
-          reject(createAbortError())
-          return
-        }
-        signal.addEventListener('abort', () => {
-          evt.aborted = true
-          reject(createAbortError())
-        }, { once: true })
-      })
-      await Promise.race([runParallel(), abortPromise])
+    if (options.raiseError === true) {
+      // Collect all rejections into AggregateError (all parallel listeners start simultaneously)
+      const settled = signal
+        ? await Promise.race([
+            Promise.allSettled(promises),
+            _createAbortPromise(signal, evt)
+          ])
+        : await Promise.allSettled(promises)
+      const rejections = settled.filter(r => r.status === 'rejected').map(r => r.reason)
+      if (rejections.length > 0) {
+        throw rejections.length === 1 ? rejections[0] : new AggregateError(rejections)
+      }
     } else {
-      await runParallel()
+      const runParallel = () => _runParallelListeners(promises, evt, resultMode)
+
+      if (signal) {
+        await Promise.race([runParallel(), _createAbortPromise(signal, evt)])
+      } else {
+        await runParallel()
+      }
     }
   } else {
     // Serial mode
+    // Only race against abort signal when raiseError is explicitly set;
+    // default (undefined) keeps old behavior: check signal between listeners only.
+    const canRaceAbort = signal && 'raiseError' in options
     for (const listener of listeners) {
       // Check AbortSignal before firing the next listener
       if (signal && signal.aborted) {
@@ -535,12 +609,19 @@ async function _executeAsync(listeners, evt, args, options) {
       }
 
       try {
-        const result = await notifyListener(listener)
+        const result = canRaceAbort
+          ? await Promise.race([notifyListener(listener), _createAbortPromise(signal, evt)])
+          : await notifyListener(listener)
         if (resultMode === 'collect') {
           evt.result.push(result)
         }
         if (evt.stopped || (resultMode === 'first' && evt.resolved)) break
       } catch (err) {
+        if (canRaceAbort && err && err.name === 'AbortError') {
+          evt.aborted = true
+          throw err
+        }
+        if (options.raiseError === true) throw err
         if (resultMode === 'collect') {
           evt.result.push(undefined)
         }

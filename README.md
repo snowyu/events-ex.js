@@ -205,10 +205,10 @@ try {
 
 **Behavior**:
 
-- **Serial mode**: Checks `signal.aborted` before each listener, throws `AbortError` immediately when triggered.
+- **Serial mode**: Checks `signal.aborted` before each listener, throws `AbortError` immediately when triggered. When `raiseError` is explicitly set (`true`/`false`/`null`), uses `Promise.race` to interrupt an actively running listener as well.
 - **Parallel mode**: Races listener execution against the signal via `Promise.race`. Throws `AbortError` when the signal wins.
 - **pipeAsync**: In serial mode, checks the source's signal before forwarding to each pipe target; skips remaining targets if aborted.
-- `Event` objects have a new `aborted` field (independent of `stopped`) to track cancellation state.
+- `Event` objects have an `aborted` field (independent of `stopped`) to track cancellation state.
 
 ### Advanced Features
 
@@ -222,6 +222,10 @@ try {
 | | `'first'` | Returns the first **non-undefined** and **successful** result. Skips errors. |
 | | `'collect'` | Returns an array of all results in registration order. |
 | **`signal`** | `AbortSignal` | An `AbortSignal` from an `AbortController` to cancel async event emission. Only passed via `configure()`, not stored on the instance. |
+| **`raiseError`** | `true` | Throws all listener errors immediately. Parallel mode aggregates multiple errors into an `AggregateError`. |
+| | `false` | Silently swallows listener errors. Used with `signal` to interrupt an executing listener in serial mode (added `Promise.race`). |
+| | `null` | **(Default for sync `emit`)** For `'error'` events only: throws if there are no error listeners (Node.js default behavior). |
+| | `undefined` | **(Default)** Same as `false` for `emitAsync`. Keeps existing behavior unchanged. |
 
 #### Proxy Isolation (Fluent API)
 
@@ -301,6 +305,9 @@ If the provided `AbortSignal` is aborted, the promise rejects with an `AbortErro
 - `type` _(string | RegExp)_: The event type to wait for. Supports regex for matching multiple events.
 - `options` _(Object)_: Optional configuration.
   - `signal` _(AbortSignal)_: An AbortSignal to cancel the wait.
+  - `raiseError` _(boolean|null)_: Controls behavior when an `'error'` event is emitted on the emitter.
+    - `true` / `undefined` **(default)**: The promise rejects with the error.
+    - `false`: The promise resolves with the error object instead of rejecting.
 - Returns: `Promise<Event>` — resolves with the Event object, which provides `type`, `target`, etc.
 
 > Note: The resolved Event object's `result` field may not be the final value if other listeners have not yet run. For the definitive emit return value, use `emit()` or `emitAsync()` directly.
@@ -346,7 +353,7 @@ try {
 
 #### setEmitterOptions(options)
 
-Configures instance-wide defaults for `asyncMode`, `resultMode`, and `maxListeners`.
+Configures instance-wide defaults for `asyncMode`, `resultMode`, `maxListeners`, and `raiseError`.
 
 [event-emitter]: https://github.com/medikoo/event-emitter
 [Ability]: https://github.com/snowyu/custom-ability.js

@@ -18,6 +18,8 @@ const emit           = methods.emitAsync
  * @param {Object} [options] - Configuration for the pipeline.
  * @param {string} [options.asyncMode='serial'] - The mode of propagation ('serial' or 'parallel').
  * @param {string} [options.resultMode] - Strategy for aggregating results from the pipe chain ('collect', 'first').
+ * @param {AbortSignal} [options.signal] - An AbortSignal to cancel forwarding to remaining pipe targets (serial mode only).
+ *   Can also be set on the source emitter via `configure({ signal })`.
  * @returns {Object} - An object with a `close` method that removes the pipeline between the two event emitters.
  * @throws {TypeError} - If either of the arguments is not an event emitter object.
  */

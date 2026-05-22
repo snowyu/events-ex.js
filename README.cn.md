@@ -175,7 +175,7 @@ try {
 
 **行为说明**：
 
-- **串行模式 (Serial)**：每个 listener 执行前检查 `signal.aborted`，触发则立即中断并抛出 `AbortError`。
+- **串行模式 (Serial)**：每个 listener 执行前检查 `signal.aborted`，触发则立即中断并抛出 `AbortError`。当显式设置了 `raiseError`（`true`/`false`/`null`）时，还会通过 `Promise.race` 打断**正在执行**的 listener。
 - **并发模式 (Parallel)**：用 `Promise.race` 将 listener 执行与 signal 竞速，signal 触发立即抛出 `AbortError`。
 - **pipeAsync**：串行模式下，向每个 pipe target 转发前检查 source 的 signal，已 abort 则跳过后续 targets。
 - `Event` 对象新增 `aborted` 字段，独立于 `stopped`，用于追踪取消状态。
@@ -192,6 +192,10 @@ try {
 | | `'first'` | 返回第一个 **非 undefined** 且 **成功** 的结果。自动跳过错误。 |
 | | `'collect'` | 按注册顺序以数组形式返回所有监听器的结果。 |
 | **`signal`** | `AbortSignal` | 通过 `AbortController` 创建的信号，用于取消异步事件发射。仅在 `configure()` 中传递，不会固化到实例上。 |
+| **`raiseError`** | `true` | 立即抛出所有监听器错误。并发模式下多个错误会聚合为 `AggregateError`。 |
+| | `false` | 静默吞掉监听器错误。与 `signal` 配合时可在串行模式下打断正在执行的监听器（启用 `Promise.race`）。 |
+| | `null` | **(同步 `emit` 默认值)** 仅针对 `error` 事件：无 error 监听器时抛出（Node.js 默认行为）。 |
+| | `undefined` | **(默认值)** 对 `emitAsync` 等同于 `false`。保持现有行为不变。 |
 
 #### 代理隔离 (Fluent API)
 
@@ -255,6 +259,9 @@ eventable(MyClass, {
 - `type` _(string | RegExp)_: 要等待的事件类型。支持正则表达式匹配多个事件。
 - `options` _(Object)_: 可选配置。
   - `signal` _(AbortSignal)_: 用于取消等待的 AbortSignal。
+  - `raiseError` _(boolean|null)_: 控制当 emitter 触发 `'error'` 事件时的行为。
+    - `true` / `undefined` **（默认）**: Promise reject 并传入错误对象。
+    - `false`: Promise resolve 并传入错误对象，而非 reject。
 - 返回: `Promise<Event>` — resolve 时传入 Event 对象，包含 `type`、`target` 等属性。
 
 > 注意：返回的 Event 对象中的 `result` 字段可能不是最终值（如果还有其他监听器尚未执行）。如需获取 emit 的最终返回值，请直接使用 `emit()` 或 `emitAsync()`。
@@ -300,7 +307,7 @@ try {
 
 #### setEmitterOptions(options)
 
-配置实例级的默认选项。
+配置实例级的默认选项，包括 `asyncMode`、`resultMode`、`maxListeners` 和 `raiseError`。
 
 [event-emitter]: https://github.com/medikoo/event-emitter
 [Ability]: https://github.com/snowyu/custom-ability.js
