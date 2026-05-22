@@ -293,7 +293,7 @@ hasListeners(emitter, 'foo'); // true
 Creates an asynchronous pipeline.
 
 - `options.asyncMode`: Propagation mode (`'serial' | 'parallel'`).
-- `options.resultMode`: Aggregation strategy.
+- `options.resultMode`: Aggregation strategy (`'last'` default | `'first'` | `'collect'`).
 
 #### oncePromise(emitter, type[, options]) _(events-ex/once-promise)_
 

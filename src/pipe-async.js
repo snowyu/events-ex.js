@@ -17,7 +17,7 @@ const emit           = methods.emitAsync
  * @param {string} [name='emitAsync'] - The name of the event to pipe (defaults to 'emitAsync').
  * @param {Object} [options] - Configuration for the pipeline.
  * @param {string} [options.asyncMode='serial'] - The mode of propagation ('serial' or 'parallel').
- * @param {string} [options.resultMode] - Strategy for aggregating results from the pipe chain ('collect', 'first').
+ * @param {string} [options.resultMode='last'] - Strategy for aggregating results from the pipe chain ('last', 'first', 'collect').
  * @param {AbortSignal} [options.signal] - An AbortSignal to cancel forwarding to remaining pipe targets (serial mode only).
  *   Can also be set on the source emitter via `configure({ signal })`.
  * @returns {Object} - An object with a `close` method that removes the pipeline between the two event emitters.
@@ -72,7 +72,10 @@ export function pipeAsync(e1, e2/* , name, options */) {
       const results = await Promise.all(promises)
       if (resultMode === 'collect') return results
       if (resultMode === 'first') return results.find(r => r !== undefined)
-      return results[0] // Default: return main emitter's result
+      // Default: 'last' — return last non-undefined result in the pipe chain
+      for (let i = results.length - 1; i >= 0; i--) {
+        if (results[i] !== undefined) return results[i]
+      }
     } else {
       const mainResult = await emit.apply(this, arguments)
       const allResults = [mainResult]
@@ -84,7 +87,10 @@ export function pipeAsync(e1, e2/* , name, options */) {
       }
       if (resultMode === 'collect') return allResults
       if (resultMode === 'first') return allResults.find(r => r !== undefined)
-      return mainResult // Default: return main emitter's result
+      // Default: 'last' — return last non-undefined result in the pipe chain
+      for (let i = allResults.length - 1; i >= 0; i--) {
+        if (allResults[i] !== undefined) return allResults[i]
+      }
     }
   }
   defineProperty(e1, name, desc.value, desc)

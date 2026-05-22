@@ -249,6 +249,9 @@ eventable(MyClass, {
 
 创建异步管道。支持配置传播模式和结果聚合策略。
 
+- `options.asyncMode`: 传播模式 (`'serial' | 'parallel'`)。
+- `options.resultMode`: 结果聚合策略（`'last'` 默认 | `'first'` | `'collect'`）。
+
 #### oncePromise(emitter, type[, options]) _(events-ex/once-promise)_
 
 返回一个 `Promise`，当指定事件在 emitter 上触发时，resolve 并传入 **Event 对象**。

@@ -437,7 +437,7 @@ describe('AbortSignal', () => {
       assert.equal(e1Count, 1)
       assert.equal(e2Count, 1)
       assert.equal(e3Count, 1)
-      assert.equal(result, 'main')
+      assert.equal(result, 'pipe2')
     })
 
     it('should stop forwarding when signal is already aborted', async () => {

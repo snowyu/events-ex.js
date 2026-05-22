@@ -681,7 +681,7 @@ describe('parallel execution', () => {
     assert.deepEqual(order, ['fast', 'slow'])
   })
 
-  it('should support result aggregation in pipeAsync (default: return main result)', async () => {
+  it('should support result aggregation in pipeAsync (default: return last result)', async () => {
     const e1 = ee()
     const e2 = ee()
     e1.on('test', () => 'r1')
@@ -689,7 +689,7 @@ describe('parallel execution', () => {
 
     pipeAsync(e1, e2)
     const res = await e1.emitAsync('test')
-    assert.equal(res, 'r1', 'Should return main emitter result by default')
+    assert.equal(res, 'r2', 'Should return last non-undefined result by default')
   })
 
   it('should support result aggregation in pipeAsync (collect mode)', async () => {
@@ -712,6 +712,32 @@ describe('parallel execution', () => {
     pipeAsync(e1, e2, { resultMode: 'first' })
     const res = await e1.emitAsync('test')
     assert.equal(res, 'r2')
+  })
+
+  it('should support result aggregation in pipeAsync (last mode)', async () => {
+    const e1 = ee()
+    const e2 = ee()
+    const e3 = ee()
+    e1.on('test', () => 'r1')
+    e2.on('test', () => undefined)
+    e3.on('test', () => 'r3')
+
+    pipeAsync(e1, e2, { resultMode: 'last' })
+    pipeAsync(e1, e3, { resultMode: 'last' })
+
+    const res = await e1.emitAsync('test')
+    assert.equal(res, 'r3', 'Should return last non-undefined result')
+  })
+
+  it('should support result aggregation in pipeAsync (last mode with all undefined)', async () => {
+    const e1 = ee()
+    const e2 = ee()
+    e1.on('test', () => undefined)
+    e2.on('test', () => undefined)
+
+    pipeAsync(e1, e2, { resultMode: 'last' })
+    const res = await e1.emitAsync('test')
+    assert.equal(res, undefined, 'Should return undefined when all results are undefined')
   })
 
   it('should support parallel propagation to multiple destinations', async () => {
