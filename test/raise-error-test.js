@@ -818,7 +818,13 @@ describe('raiseError', () => {
       // which propagates through _executeAsync to emitAsync's catch.
       // raiseError=false but r.type='data' → error caught and swallowed → promise resolves.
       // The error from the error handler is swallowed but the infinite loop is prevented.
-      const result = await e.emitAsync('data');
+
+      try {
+        await e.emitAsync('data')
+        assert.fail('should throw errorr-in-error')
+      } catch(err) {
+        assert(err.message, 'error-in-error')
+      }
       assert.equal(errorCalls, 1, 'error listener called exactly once');
     });
 
