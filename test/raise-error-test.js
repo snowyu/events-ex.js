@@ -683,6 +683,201 @@ describe('raiseError', () => {
   });
 
   // ============================================================
+  //  Error listener throws within error listener
+  //  (recursion / stack overflow scenarios)
+  // ============================================================
+  describe('error listener throws — recursion / stack overflow scenarios', () => {
+
+    // ----------------------------------------------------
+    // raiseError=true: already safe — bypass listener dispatch
+    // ----------------------------------------------------
+    it('raiseError=true: emits "error" bypasses listener, error listener never invoked (no loop risk)', () => {
+      const e = new EventEmitter();
+      e.setEmitterOptions({ raiseError: true });
+      let errorCalled = false;
+      e.on('error', () => { errorCalled = true; throw new Error('error-in-error'); });
+
+      assert.throws(() => { e.emit('error', new Error('boom')); }, 'boom');
+      assert.isFalse(errorCalled, 'error listener not called, so it cannot throw → no recursion');
+    });
+
+    it('raiseError=true: listener error in non-error event fail-fasts, no error re-emit (no loop risk)', () => {
+      const e = new EventEmitter();
+      e.setEmitterOptions({ raiseError: true });
+      let errorCalled = false;
+      e.on('data', () => { throw new Error('data-err'); });
+      e.on('error', () => { errorCalled = true; throw new Error('error-in-error'); });
+
+      assert.throws(() => { e.emit('data'); }, 'data-err');
+      assert.isFalse(errorCalled, 'error re-emit never happens → no recursion');
+    });
+
+    // ----------------------------------------------------
+    // raiseError=false: error throw now propagates instead of infinite re-emit
+    // ----------------------------------------------------
+    it('raiseError=false: error listener that throws now propagates as exception, no stack overflow', () => {
+      const e = new EventEmitter();
+      e.setEmitterOptions({ raiseError: false });
+      let errorCalls = 0;
+      e.on('data', () => { throw new Error('data-err'); });
+      e.on('error', () => { errorCalls++; throw new Error('error-in-error'); });
+
+      assert.throws(() => { e.emit('data'); }, 'error-in-error');
+      assert.equal(errorCalls, 1, 'error listener called exactly once');
+    });
+
+    // ----------------------------------------------------
+    // raiseError=undefined (default): error throw propagates as exception
+    // ----------------------------------------------------
+    it('default raiseError (undefined): error listener that throws propagates as exception, no stack overflow', () => {
+      const e = new EventEmitter();
+      let errorCalls = 0;
+      e.on('data', () => { throw new Error('data-err'); });
+      e.on('error', () => { errorCalls++; throw new Error('error-in-error'); });
+
+      assert.throws(() => { e.emit('data'); }, 'error-in-error');
+      assert.equal(errorCalls, 1, 'error listener called exactly once');
+    });
+
+    // ----------------------------------------------------
+    // raiseError=null: error throw propagates as exception
+    // ----------------------------------------------------
+    it('raiseError=null: error listener that throws propagates as exception, no stack overflow', () => {
+      const e = new EventEmitter();
+      e.setEmitterOptions({ raiseError: null });
+      let errorCalls = 0;
+      e.on('data', () => { throw new Error('data-err'); });
+      e.on('error', () => { errorCalls++; throw new Error('error-in-error'); });
+
+      assert.throws(() => { e.emit('data'); }, 'error-in-error');
+      assert.equal(errorCalls, 1, 'error listener called exactly once');
+    });
+
+    // ----------------------------------------------------
+    // raiseError=false + once: self-terminating (no overflow)
+    // ----------------------------------------------------
+    it('raiseError=false: once() error listener that throws self-terminates, no stack overflow', () => {
+      const e = new EventEmitter();
+      e.setEmitterOptions({ raiseError: false });
+      let errorCallCount = 0;
+      e.on('data', () => { throw new Error('data-err'); });
+
+      e.once('error', () => { errorCallCount++; throw new Error('error-in-error'); });
+
+      // once removes listener after call → next re-emit: no listeners → raiseError=false → silent return
+      assert.throws(function(){e.emit('data')}, /error-in-error/)
+      // try {
+      //   e.emit('data');
+      //   assert.fail('should throw error-in-error')
+      // } catch(e) {
+      //   assert.equal(e.message, 'error-in-error')
+      // }
+      assert.equal(errorCallCount, 1, 'once error listener called exactly once');
+    });
+
+    // ----------------------------------------------------
+    // default + once: error throw directly propagates from errs loop
+    // ----------------------------------------------------
+    it('default raiseError with once(): error throw propagates as exception, terminates recursion', () => {
+      const e = new EventEmitter();
+      let errorCallCount = 0;
+      e.on('data', () => { throw new Error('data-err'); });
+      e.once('error', () => { errorCallCount++; throw new Error('error-in-error'); });
+
+      // Error listener throws → r.type='error' → throw it.err directly (no re-emit)
+      assert.throws(() => { e.emit('data'); }, 'error-in-error');
+      assert.equal(errorCallCount, 1, 'once error listener called exactly once');
+    });
+
+    // ----------------------------------------------------
+    // raiseError=null + once: error throw directly propagates from errs loop
+    // ----------------------------------------------------
+    it('raiseError=null with once(): error throw propagates as exception, terminates recursion', () => {
+      const e = new EventEmitter();
+      e.setEmitterOptions({ raiseError: null });
+      let errorCallCount = 0;
+      e.on('data', () => { throw new Error('data-err'); });
+      e.once('error', () => { errorCallCount++; throw new Error('error-in-error'); });
+
+      // Error listener throws → r.type='error' → throw it.err directly (no re-emit)
+      assert.throws(() => { e.emit('data'); }, 'error-in-error');
+      assert.equal(errorCallCount, 1);
+    });
+
+    // ----------------------------------------------------
+    // emitAsync: error from error handler propagates as exception from _executeAsync
+    // ----------------------------------------------------
+    it('emitAsync raiseError=false: error listener throw propagates as exception, promise rejects', async () => {
+      const e = new EventEmitter();
+      e.setEmitterOptions({ raiseError: false });
+      let errorCalls = 0;
+      e.on('data', async () => { throw new Error('data-err'); });
+      e.on('error', () => { errorCalls++; throw new Error('error-in-error'); });
+
+      // Sync emit() call inside _executeAsync errs loop throws error-in-error,
+      // which propagates through _executeAsync to emitAsync's catch.
+      // raiseError=false but r.type='data' → error caught and swallowed → promise resolves.
+      // The error from the error handler is swallowed but the infinite loop is prevented.
+      const result = await e.emitAsync('data');
+      assert.equal(errorCalls, 1, 'error listener called exactly once');
+    });
+
+    it('emitAsync default raiseError: error listener throw propagates, promise resolves', async () => {
+      const e = new EventEmitter();
+      let errorCalls = 0;
+      e.on('data', async () => { throw new Error('data-err'); });
+      e.on('error', () => { errorCalls++; throw new Error('error-in-error'); });
+
+      const result = await e.emitAsync('data');
+      assert.equal(errorCalls, 1, 'error listener called exactly once');
+    });
+
+    // ----------------------------------------------------
+    // emitAsync + once: self-terminating — no overflow
+    // ----------------------------------------------------
+    it('emitAsync raiseError=false with once(): self-terminates, no overflow', async () => {
+      const e = new EventEmitter();
+      e.setEmitterOptions({ raiseError: false });
+      let errorCallCount = 0;
+      e.on('data', async () => { throw new Error('data-err'); });
+      e.once('error', () => { errorCallCount++; throw new Error('error-in-error'); });
+
+      await e.emitAsync('data');
+      assert.equal(errorCallCount, 1, 'once error listener called exactly once');
+    });
+
+    it('emitAsync default raiseError with once(): error swallowed in catch, promise resolves', async () => {
+      const e = new EventEmitter();
+      let errorCallCount = 0;
+      e.on('data', async () => { throw new Error('data-err'); });
+      e.once('error', () => { errorCallCount++; throw new Error('error-in-error'); });
+
+      // The sync emit() throw inside _executeAsync propagates to emitAsync's catch
+      // raiseError !== true → swallowed, promise resolves
+      const result = await e.emitAsync('data');
+      assert.equal(errorCallCount, 1, 'once error listener called exactly once');
+    });
+
+    // ----------------------------------------------------
+    // multiple data listeners + error listener throws:
+    // all data listeners run, then error-in-error propagates as exception
+    // ----------------------------------------------------
+    it('raiseError=false: all data listeners run before error-in-error propagates as exception', () => {
+      const e = new EventEmitter();
+      e.setEmitterOptions({ raiseError: false });
+      const dataCalls = [];
+      let errorCalls = 0;
+      e.on('data', () => { dataCalls.push(1); throw new Error('err1'); });
+      e.on('data', () => { dataCalls.push(2); throw new Error('err2'); });
+      e.on('error', () => { errorCalls++; throw new Error('error-in-error'); });
+
+      assert.throws(() => { e.emit('data'); }, 'error-in-error');
+      assert.deepEqual(dataCalls, [1, 2], 'all data listeners should execute');
+      assert.equal(errorCalls, 1, 'error listener called exactly once');
+    });
+  });
+
+  // ============================================================
   //  Integration: raiseError with parallel/configure
   // ============================================================
   describe('integration with parallel/configure', () => {

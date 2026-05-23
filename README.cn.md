@@ -56,6 +56,13 @@
   * 添加了 `listenerCount()` 类方法，以保持与 Node 事件模块的兼容性。
   * 添加了`emitAsync`等方法,支持异步事件
 
+* 🔗 **事件管道与统一**：
+  * `pipe(source, target)`: 同步事件转发。
+  * `pipeAsync(source, target, options)`: 异步转发，支持可配置的并发性与聚合。
+  * `unify(emitter1, emitter2)`: 双向事件同步。
+
+> 注意：监听器抛出的错误不会打断通知流程——捕获到的错误会在所有监听器执行完毕后，以 `'error'` 事件形式重新 emit（`emit('error', error, 'notify', eventName, listener, args)`）。**例外**：如果错误是在 `'error'` 事件监听器内部抛出的，它会直接作为异常向外传播（而非再次 emit），以**避免无限递归/栈溢出**。
+
 ---
 
 ### 用法

@@ -164,11 +164,14 @@ export function getEventableMethods(aClass) {
       let fired = false
       const self = this
 
-      async function _once() {
+      function _once() {
         self.off(type, _once)
         if (!fired) {
           fired = true
-          await listener.apply(this, arguments)
+          const result = listener.apply(this, arguments)
+          if (result instanceof Promise) {
+            return result
+          }
         }
       }
       _once.listener = listener
@@ -207,6 +210,7 @@ export function getEventableMethods(aClass) {
         if (errs.length) {
           for (let i=0;i<errs.length;i++) {
             const it = errs[i]
+            if (r.type === 'error') {throw it.err}
             this.emit('error', it.err, 'notify', r.type, it.listener, args)
           }
         }
@@ -241,6 +245,7 @@ export function getEventableMethods(aClass) {
       } catch (err) {
         if (err && err.name === 'AbortError') throw err
         if (options.raiseError === true) throw err
+        if (r.type === 'error') throw err
         // Other unexpected errors: still return the event result
         return evt.end()
       }
@@ -632,6 +637,7 @@ async function _executeAsync(listeners, evt, args, options) {
   if (errs.length) {
     for (let i = 0; i < errs.length; i++) {
       const it = errs[i]
+      if (evt.type === 'error') {throw it.err}
       this.emit('error', it.err, 'notify', evt.type, it.listener, args)
     }
   }
