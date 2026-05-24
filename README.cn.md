@@ -61,7 +61,7 @@
   * `pipeAsync(source, target, options)`: 异步转发，支持可配置的并发性与聚合。
   * `unify(emitter1, emitter2)`: 双向事件同步。
 
-> 注意：监听器抛出的错误不会打断通知流程——捕获到的错误会在所有监听器执行完毕后，以 `'error'` 事件形式重新 emit（`emit('error', error, 'notify', eventName, listener, args)`）。**例外**：如果错误是在 `'error'` 事件监听器内部抛出的，它会直接作为异常向外传播（而非再次 emit），以**避免无限递归/栈溢出**。
+> 注意：监听器抛出的错误不会打断通知流程——捕获到的错误会在所有监听器执行完毕后，以 `'error'` 事件形式重新触发。**例外**：如果错误是在 `'error'` 事件监听器内部抛出的，它会直接作为异常（同步）或 Promise rejection（异步）向外传播而非再次触发，以**避免无限递归/栈溢出**。此机制同时适用于 `emit()` 和 `emitAsync()`。
 
 ---
 

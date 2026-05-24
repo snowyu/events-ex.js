@@ -655,6 +655,30 @@ describe('AbortSignal', () => {
       // Error events ARE emitted during execution, before the abort check
       assert.equal(errors.length, 1, 'error event should be emitted')
     })
+
+    it('should emit error events even when abort happens during execution (error listener throws)', async () => {
+      const emitter = ee()
+      const controller = new AbortController()
+
+      const errors = []
+      emitter.on('test', async () => {
+        controller.abort()
+        throw new Error('boom')
+      })
+      emitter.on('error', (err) => {
+        errors.push(err)
+        throw new Error('error-in-error')
+      })
+
+      try {
+        await emitter.configure({ signal: controller.signal }).emitAsync('test')
+        assert.fail('should have thrown')
+      } catch (err) {
+        assert.equal(err.message, 'error-in-error', 'error-in-error should propagate')
+      }
+      // Error event IS emitted before error-in-error takes over
+      assert.equal(errors.length, 1, 'error event should be emitted')
+    })
   })
 
   // ---- signal cleanup ----

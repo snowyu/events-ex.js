@@ -61,7 +61,7 @@ Browser-friendly enhanced event emitter [ability][Ability] and class. It's modif
   * `pipeAsync(source, target, options)`: Async forwarding with configurable concurrency and aggregation.
   * `unify(emitter1, emitter2)`: Bi-directional synchronization.
 
-Note: A listener's throw error does not break the notification flow—caught errors are collected and then emitted as an `'error'` event (`emit('error', error, 'notify', eventName, listener, args)`) after all listeners run. **Exception**: If the error is thrown inside an `'error'` event listener itself, it propagates directly as a thrown exception (instead of being re-emitted), preventing infinite recursion / stack overflow.
+Note: A listener's throw error does not break the notification flow—caught errors are collected and then re-emitted as an `'error'` event after all listeners run. **Exception**: If the error is thrown inside an `'error'` event listener itself, it propagates directly as a thrown exception (sync) or a rejected promise (async), preventing infinite recursion / stack overflow. This applies to both `emit()` and `emitAsync()`.
 
 ### Installation
 

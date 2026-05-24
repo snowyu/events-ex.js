@@ -245,7 +245,11 @@ export function getEventableMethods(aClass) {
       } catch (err) {
         if (err && err.name === 'AbortError') throw err
         if (options.raiseError === true) throw err
-        if (r.type === 'error') throw err
+        if (r.type === 'error') {
+          Object.defineProperty(err, '_errorInError', { value: true, enumerable: false })
+          throw err
+        }
+        if (err && err._errorInError) throw err
         // Other unexpected errors: still return the event result
         return evt.end()
       }
@@ -634,11 +638,18 @@ async function _executeAsync(listeners, evt, args, options) {
     }
   }
 
-  if (errs.length) {
+      if (errs.length) {
     for (let i = 0; i < errs.length; i++) {
       const it = errs[i]
       if (evt.type === 'error') {throw it.err}
-      this.emit('error', it.err, 'notify', evt.type, it.listener, args)
+      // Temporarily clear signal so error re-emission is not blocked by an already-aborted signal
+      const savedSignal = this._eeRuntimeOptions && this._eeRuntimeOptions.signal
+      if (savedSignal) { delete this._eeRuntimeOptions.signal }
+      try {
+        await this.emitAsync('error', it.err, 'notify', evt.type, it.listener, args)
+      } finally {
+        if (savedSignal) { this._eeRuntimeOptions.signal = savedSignal }
+      }
     }
   }
 
