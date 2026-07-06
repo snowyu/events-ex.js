@@ -35,10 +35,16 @@
     "url": "git://github.com/snowyu/events-ex.js.git"
   },
   "main": "./lib/index.js",
-  "module": "./src/index.js",
+  "module": "./lib/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./lib/index.mjs",
+      "require": "./lib/index.js"
+    }
+  },
   "dependencies": {
     "custom-ability": "^2.2.0",
-    "util-ex": "^2.6.0"
+    "util-ex": "^2.7.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^9.0.0",
@@ -59,7 +65,7 @@
   },
   "scripts": {
     "build": "npm run build.cjs && npm run build.ts && npm run doc.md",
-    "build.cjs": "babel src --out-dir lib --config-file ./.babelrc",
+    "build.cjs": "babel src --out-dir lib --config-file ./.babelrc && node scripts/copy-to-mjs.mjs",
     "build.ts": "tsc --declaration --emitDeclarationOnly --outDir lib && cp src/event-emitter.d.ts lib/",
     "clean": "rm -fr web docs lib",
     "clean.doc": "rm -fr web docs",
