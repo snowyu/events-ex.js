@@ -8,7 +8,7 @@
 
 > **eventable**\<`T`\>(`targetClass?`, `options?`): `EnhancedClass`\<`T`, (`aClass?`) => `Function`\>
 
-Defined in: [src/eventable.js:89](https://github.com/snowyu/events-ex.js/blob/1738d9bce8d1eae4826213336afe3c0c8e5fa482/src/eventable.js#L89)
+Defined in: [src/eventable.js:89](https://github.com/snowyu/events-ex.js/blob/4b0e5c2237202c2cc8b9e9244905d2c668799451/src/eventable.js#L89)
 
 Adds event-emitting capabilities to a class by injecting necessary methods and properties.
 
