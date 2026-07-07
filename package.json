@@ -43,7 +43,7 @@
     }
   },
   "dependencies": {
-    "custom-ability": "^2.2.0",
+    "custom-ability": "^2.3.0",
     "util-ex": "^2.7.0"
   },
   "devDependencies": {
