@@ -1,6 +1,6 @@
 {
   "name": "events-ex",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "Browser-friendly enhanced events most compatible with standard node.js, it's powerful eventable ability.",
   "contributors": [
     {

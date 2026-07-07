@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.4.0](https://github.com/snowyu/events-ex.js/compare/v2.3.1...v2.4.0) (2026-07-07)
+
+
+### Features
+
+* add AbortSignal support for async event emission ([ca3e851](https://github.com/snowyu/events-ex.js/commit/ca3e8519ec6c87de8e0ab0ef824b63b2abb1d391))
+* add oncePromise to convert event into Promise ([fe80487](https://github.com/snowyu/events-ex.js/commit/fe8048727b78365569cedc7d4aa9b71bfb01d715))
+* add raiseError option for error handling control ([d26b490](https://github.com/snowyu/events-ex.js/commit/d26b4907a6217095b9de61e0f698145fe9e2b7c6))
+* update esm support ([d26bdae](https://github.com/snowyu/events-ex.js/commit/d26bdae527dff2296ff52d0d7b94d37c9f694683))
+
+
+### Bug Fixes
+
+* **build:** strictly mjs import and chagnes ([1738d9b](https://github.com/snowyu/events-ex.js/commit/1738d9bce8d1eae4826213336afe3c0c8e5fa482))
+* emitAsync error-in-error propagation and error re-emission ([94f2e0f](https://github.com/snowyu/events-ex.js/commit/94f2e0f8f24029fcbc1455eee2a0f0fe299f10de))
+* **pipe-async:** default resultMode to 'last' to align with emitAsync ([a54de61](https://github.com/snowyu/events-ex.js/commit/a54de6103fb895e9096c764ea481fcc03e62f7aa))
+* prevent infinite recursion when error listener throws ([a52cebb](https://github.com/snowyu/events-ex.js/commit/a52cebb0771acddb2940a8e4d8868b4e0e5d7b04))
+
 ## [2.3.1](https://github.com/snowyu/events-ex.js/compare/v2.3.0...v2.3.1) (2026-04-17)
 
 
