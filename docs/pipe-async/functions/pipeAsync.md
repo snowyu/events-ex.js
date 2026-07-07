@@ -6,9 +6,9 @@
 
 # Function: pipeAsync()
 
-> **pipeAsync**(`e1`, `e2`, ...`args`): `any`
+> **pipeAsync**(`e1`, `e2`, ...`args`): `Object`
 
-Defined in: [src/pipe-async.js:24](https://github.com/snowyu/events-ex.js/blob/f6c44157ffda17957fad5ad2e0aedbb8ec521be7/src/pipe-async.js#L24)
+Defined in: [src/pipe-async.js:26](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/pipe-async.js#L26)
 
 Creates a pipeline between two event emitters, so that any events emitted by the first emitter are also emitted by the second emitter.
 
@@ -32,7 +32,7 @@ The second event emitter.
 
 ## Returns
 
-`any`
+`Object`
 
 - An object with a `close` method that removes the pipeline between the two event emitters.
 

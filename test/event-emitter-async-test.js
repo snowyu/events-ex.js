@@ -1,19 +1,7 @@
 import {assert} from "chai";
 
 import wrapEventEmitter from '../src/wrap-event-emitter'
-
-function wait(milliseconds){
-  return new Promise(resolve => {
-      setTimeout(resolve, milliseconds);
-  });
-}
-function deepEqu(act, expected, msg) {
-	assert.exists(act)
-	assert.exists(expected)
-	for (const i in expected) {
-		assert.equal(act[i], expected[i], msg)
-	}
-}
+import {deepEqu, sleep} from './test-helper'
 describe('event-emitter-async', () => {
 	it('should emit', async () => {
 		var x = wrapEventEmitter(), y, count, count2, count3, count4, test, listener1, listener2;
@@ -24,7 +12,7 @@ describe('event-emitter-async', () => {
 		count = 0;
 		x.once('foo', async function (a1, a2, a3) {
 			defaultEvent.target = x;
-			await wait(10)
+			await sleep(10)
 			deepEqu(this, defaultEvent, test + "Context");
 			deepEqu([a1, a2, a3], ['foo', x, 15], test + "Arguments");
 			++count;
@@ -41,7 +29,7 @@ describe('event-emitter-async', () => {
 		count = 0;
 		x.on('foo', listener1 = async function (a1, a2, a3) {
 			defaultEvent.target = x;
-			await wait(10)
+			await sleep(10)
 			deepEqu(this, defaultEvent, test + "Context");
 			deepEqu([a1, a2, a3], ['foo', x, 15], test + "Arguments");
 			++count;

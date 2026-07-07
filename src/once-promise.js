@@ -46,6 +46,7 @@ export function oncePromise(emitter, type, options) {
         return
       }
       onAbort = () => {
+        /* v8 ignore next — defensive guard, { once: true } ensures callback fires at most once */
         if (!aborted) {
           aborted = true
           cleanup()

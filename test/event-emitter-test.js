@@ -1,14 +1,7 @@
 import {assert} from "chai";
 
 import eventEmitter from '../src/wrap-event-emitter'
-
-function deepEqu(act, expected, msg) {
-	assert.exists(act)
-	assert.exists(expected)
-	for (const i in expected) {
-		assert.equal(act[i], expected[i], msg)
-	}
-}
+import {deepEqu} from './test-helper'
 describe('event-emitter', () => {
 	it('should emit', () => {
 		var x = eventEmitter(), y, count, count2, count3, count4, test, listener1, listener2;

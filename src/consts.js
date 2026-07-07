@@ -10,6 +10,7 @@ export const states = {
   ABORT,
 }
 
+/* v8 ignore next — false branch only reachable without Symbol, which is impossible in Node.js */
 export const RegExpEventSymbol = typeof Symbol === 'function' ? Symbol('RegExpEvent') : '@@RegExpEvent'
 
 /**

@@ -1,7 +1,7 @@
 import validObject from './util/valid-object'
 import forEach from './util/object-for-each'
 
-const push = Array.prototype.apply
+const push = Array.prototype.push
 const defineProperty = Object.defineProperty
 const create = Object.create
 const hasOwnProperty = Object.prototype.hasOwnProperty

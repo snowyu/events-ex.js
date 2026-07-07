@@ -6,9 +6,9 @@
 
 # Function: pipe()
 
-> **pipe**(`e1`, `e2`, ...`args`): `any`
+> **pipe**(`e1`, `e2`, ...`args`): `Object`
 
-Defined in: [src/pipe.js:21](https://github.com/snowyu/events-ex.js/blob/f6c44157ffda17957fad5ad2e0aedbb8ec521be7/src/pipe.js#L21)
+Defined in: [src/pipe.js:21](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/pipe.js#L21)
 
 Creates a pipeline between two event emitters, so that any events emitted by the first emitter are also emitted by the second emitter.
 
@@ -32,7 +32,7 @@ The second event emitter.
 
 ## Returns
 
-`any`
+`Object`
 
 - An object with a `close` method that removes the pipeline between the two event emitters.
 

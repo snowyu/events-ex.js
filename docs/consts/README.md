@@ -10,3 +10,7 @@
 
 - [RegExpEventSymbol](variables/RegExpEventSymbol.md)
 - [states](variables/states.md)
+
+## Functions
+
+- [createAbortError](functions/createAbortError.md)

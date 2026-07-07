@@ -8,7 +8,7 @@
 
 > **getEventableMethods**(`aClass`): `object`
 
-Defined in: [src/default-methods.js:15](https://github.com/snowyu/events-ex.js/blob/f6c44157ffda17957fad5ad2e0aedbb8ec521be7/src/default-methods.js#L15)
+Defined in: [src/default-methods.js:15](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/default-methods.js#L15)
 
 ## Parameters
 
@@ -36,11 +36,27 @@ Configuration options for event emission.
 
 The mode of asynchronous emission ('serial' or 'parallel').
 
+###### raiseError?
+
+`boolean` \| `null`
+
+Controls error handling behavior:
+  - `true`: Always throw listener errors immediately.
+  - `false`: Silently swallow listener errors.
+  - `null`: Throw only for 'error' events with no error listeners (Node.js default).
+  - `undefined` (default): Same as `false` for emitAsync.
+
 ###### resultMode?
 
 `string`
 
 The strategy for handling multiple return values ('last', 'first', 'collect').
+
+###### signal?
+
+`any`
+
+An AbortSignal to cancel async event emission.
 
 #### Returns
 
@@ -130,9 +146,9 @@ Removes a listener function from the specified event type.
 
 ##### type
 
-The event type to remove the listener from.
+`string` \| `RegExp`
 
-`string` | `RegExp`
+The event type to remove the listener from.
 
 ##### listener
 
@@ -160,9 +176,9 @@ Adds a listener function to the specified event type.
 
 ##### type
 
-The event type to listen for.
+`string` \| `RegExp`
 
-`string` | `RegExp`
+The event type to listen for.
 
 ##### listener
 
@@ -172,13 +188,13 @@ The listener function to be called when the event is emitted.
 
 ##### index?
 
+`number` \| `"first"` \| `"last"`
+
 The index at which to insert the listener.
        - 'first' or -Infinity: Adds to the "Head" zone. The first listener added as 'first' is placed at the very front.
        - 'last' or Infinity: Adds to the "Tail" zone. The first listener added as 'last' will always be the very last one to execute.
        - number: Inserts at the specified index within the "Body" (normal) zone.
        If not specified, the listener is added to the end of the "Body" zone.
-
-`number` | `"first"` | `"last"`
 
 #### Returns
 
@@ -200,9 +216,9 @@ Adds a one-time listener function to the specified event type.
 
 ##### type
 
-The event type to listen for.
+`string` \| `RegExp`
 
-`string` | `RegExp`
+The event type to listen for.
 
 ##### listener
 
@@ -212,13 +228,13 @@ The listener function to be called once when the event is emitted.
 
 ##### index?
 
+`number` \| `"first"` \| `"last"`
+
 The index at which to insert the listener.
        - 'first' or -Infinity: Adds to the "Head" zone. The first listener added as 'first' is placed at the very front.
        - 'last' or Infinity: Adds to the "Tail" zone. The first listener added as 'last' will always be the very last one to execute.
        - number: Inserts at the specified index within the "Body" (normal) zone.
        If not specified, the listener is added to the end of the "Body" zone.
-
-`number` | `"first"` | `"last"`
 
 #### Returns
 
@@ -260,9 +276,9 @@ Removes all listener functions from the specified event type.
 
 ##### type
 
-The event type to remove the listener from.
+`string` \| `RegExp`
 
-`string` | `RegExp`
+The event type to remove the listener from.
 
 #### Returns
 
@@ -284,9 +300,9 @@ Sets the configuration options for the EventEmitter instance.
 
 ##### options
 
-`any`
+`Object`
 
-Configuration options for the emitter (e.g., asyncMode, resultMode, maxListeners).
+Configuration options for the emitter (e.g., asyncMode, resultMode, maxListeners, raiseError).
 
 #### Returns
 
@@ -296,7 +312,7 @@ The EventEmitter instance for chaining.
 
 ### setMaxListeners()
 
-> **setMaxListeners**(`n`): \{ configure(options: \{ asyncMode?: string; resultMode?: string; \}): EventEmitter; parallel(resultMode?: string): EventEmitter; setEmitterOptions(options: any): EventEmitter; ... 8 more ...; removeAllListeners(type: string \| RegExp): EventEmitter; \}
+> **setMaxListeners**(`n`): \{ configure(options: \{ asyncMode?: string \| undefined; resultMode?: string \| undefined; signal?: any; raiseError?: boolean \| null \| undefined; \}): EventEmitter; parallel(resultMode?: string \| undefined): EventEmitter; ... 9 more ...; removeAllListeners(type: string \| RegExp): EventEmitter; \}
 
 #### Parameters
 
@@ -306,4 +322,4 @@ The EventEmitter instance for chaining.
 
 #### Returns
 
-\{ configure(options: \{ asyncMode?: string; resultMode?: string; \}): EventEmitter; parallel(resultMode?: string): EventEmitter; setEmitterOptions(options: any): EventEmitter; ... 8 more ...; removeAllListeners(type: string \| RegExp): EventEmitter; \}
+\{ configure(options: \{ asyncMode?: string \| undefined; resultMode?: string \| undefined; signal?: any; raiseError?: boolean \| null \| undefined; \}): EventEmitter; parallel(resultMode?: string \| undefined): EventEmitter; ... 9 more ...; removeAllListeners(type: string \| RegExp): EventEmitter; \}

@@ -1,10 +1,7 @@
 import {assert} from "chai";
 
 import ee from '../src/wrap-event-emitter'
-
-async function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
+import {sleep} from './test-helper'
 
 describe('bubbling', () => {
 	it('should bubbling result', () => {

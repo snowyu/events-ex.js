@@ -114,5 +114,47 @@ describe('eventable', () => {
     assert.equal(oldExec, 1, 'should execute the original func once');
     assert.equal(newExec, 1, 'should execute the new func once');
   });
+
+  it('should create a class when no class is provided', function(){
+    var EventableClass = eventable();
+    assert.isFunction(EventableClass, 'should return a class/function');
+    // The returned class should have defaultMaxListeners
+    assert.equal(EventableClass.defaultMaxListeners, 10);
+    // Instances should have event methods
+    var instance = new EventableClass();
+    assert.isFunction(instance.on);
+    assert.isFunction(instance.off);
+    assert.isFunction(instance.emit);
+    assert.isFunction(instance.emitAsync);
+    assert.isFunction(instance.once);
+    // Should work as an event emitter
+    var called = false;
+    instance.on('test', function() { called = true; });
+    instance.emit('test');
+    assert.isTrue(called, 'event should work');
+  });
+
+  it('should support classMethods option', function(){
+    var My = function(){};
+    eventable(My, {
+      classMethods: {
+        myStatic: function() { return 'static-value'; }
+      }
+    });
+    assert.isFunction(My.myStatic);
+    assert.equal(My.myStatic(), 'static-value');
+  });
+
+  it('should include and exclude methods', function(){
+    var My = function(){};
+    eventable(My, {
+      include: ['on', 'off'],
+    });
+    // Should NOT have other static methods not included
+    assert.isUndefined(My.listenerCount);
+    // Prototype should only have 'on' and 'off'
+    var protoKeys = Object.keys(My.prototype);
+    assert.deepEqual(protoKeys.sort(), ['off', 'on']);
+  });
 });
 

@@ -6,7 +6,7 @@
 
 # Class: Event
 
-Defined in: [src/event.js:8](https://github.com/snowyu/events-ex.js/blob/f6c44157ffda17957fad5ad2e0aedbb8ec521be7/src/event.js#L8)
+Defined in: [src/event.js:8](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/event.js#L8)
 
 Creates a new Event object instance that contains information about the event, such as the target element and the return value of the event.
 
@@ -24,7 +24,7 @@ Who trigger the event
 
 > **new Event**(`target`, `type`): `Event`
 
-Defined in: [src/event.js:8](https://github.com/snowyu/events-ex.js/blob/f6c44157ffda17957fad5ad2e0aedbb8ec521be7/src/event.js#L8)
+Defined in: [src/event.js:8](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/event.js#L8)
 
 Creates a new Event object instance that contains information about the event, such as the target element and the return value of the event.
 
@@ -52,11 +52,21 @@ Event Object that contains information about the event, such as the target eleme
 
 ## Properties
 
+### aborted
+
+> **aborted**: `boolean` \| `undefined`
+
+Defined in: [src/event.js:38](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/event.js#L38)
+
+Whether the event emission was aborted via AbortSignal.
+
+***
+
 ### resolved
 
-> **resolved**: `boolean`
+> **resolved**: `boolean` \| `undefined`
 
-Defined in: [src/event.js:38](https://github.com/snowyu/events-ex.js/blob/f6c44157ffda17957fad5ad2e0aedbb8ec521be7/src/event.js#L38)
+Defined in: [src/event.js:44](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/event.js#L44)
 
 Whether a result has been resolved (for 'first' result mode)
 
@@ -66,7 +76,7 @@ Whether a result has been resolved (for 'first' result mode)
 
 > **result**: `any`
 
-Defined in: [src/event.js:44](https://github.com/snowyu/events-ex.js/blob/f6c44157ffda17957fad5ad2e0aedbb8ec521be7/src/event.js#L44)
+Defined in: [src/event.js:50](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/event.js#L50)
 
 Keep your event result here if any.
 
@@ -74,9 +84,9 @@ Keep your event result here if any.
 
 ### stopped
 
-> **stopped**: `boolean`
+> **stopped**: `boolean` \| `undefined`
 
-Defined in: [src/event.js:32](https://github.com/snowyu/events-ex.js/blob/f6c44157ffda17957fad5ad2e0aedbb8ec521be7/src/event.js#L32)
+Defined in: [src/event.js:32](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/event.js#L32)
 
 Whether stop the bubbling event
 
@@ -84,9 +94,9 @@ Whether stop the bubbling event
 
 ### target
 
-> **target**: `any`
+> **target**: `Object` \| `undefined`
 
-Defined in: [src/event.js:26](https://github.com/snowyu/events-ex.js/blob/f6c44157ffda17957fad5ad2e0aedbb8ec521be7/src/event.js#L26)
+Defined in: [src/event.js:26](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/event.js#L26)
 
 Who trigger the event
 
@@ -94,9 +104,9 @@ Who trigger the event
 
 ### type
 
-> **type**: `string`
+> **type**: `string` \| `undefined`
 
-Defined in: [src/event.js:50](https://github.com/snowyu/events-ex.js/blob/f6c44157ffda17957fad5ad2e0aedbb8ec521be7/src/event.js#L50)
+Defined in: [src/event.js:56](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/event.js#L56)
 
 The type of the event.
 
@@ -106,7 +116,7 @@ The type of the event.
 
 > **end**(): `any`
 
-Defined in: [src/event.js:57](https://github.com/snowyu/events-ex.js/blob/f6c44157ffda17957fad5ad2e0aedbb8ec521be7/src/event.js#L57)
+Defined in: [src/event.js:63](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/event.js#L63)
 
 Ends the event and returns the result.
 
@@ -122,7 +132,7 @@ The result of the event.
 
 > **init**(`target`, `type`): `void`
 
-Defined in: [src/event.js:20](https://github.com/snowyu/events-ex.js/blob/f6c44157ffda17957fad5ad2e0aedbb8ec521be7/src/event.js#L20)
+Defined in: [src/event.js:20](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/event.js#L20)
 
 Initializes the event with the target object.
 

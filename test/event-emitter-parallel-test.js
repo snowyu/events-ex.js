@@ -2,10 +2,7 @@ import { assert } from 'chai'
 import ee from '../src/wrap-event-emitter'
 import { pipeAsync } from '../src/pipe-async'
 import { eventable } from '../src/eventable'
-
-async function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
+import {sleep} from './test-helper'
 
 describe('parallel execution', () => {
   it('should support parallel execution with collect mode', async () => {

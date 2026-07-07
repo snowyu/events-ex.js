@@ -447,6 +447,7 @@ function _emit(type, msg) {
     const opts = _getOptions(this)
     // raiseError: true → always throw, bypass listener dispatch
     if (opts.raiseError === true) {
+      /* v8 ignore next — msg is guaranteed truthy here; falsy case is caught by earlier !msg check */
       if (!(msg instanceof Error)) {msg = new Error(msg ? UnCAUGHT_ERR + msg : UnCAUGHT_ERR)}
       throw msg
     }
@@ -459,6 +460,7 @@ function _emit(type, msg) {
       return
     }
     // raiseError: undefined / null → Node.js default behavior
+    /* v8 ignore next — msg is guaranteed truthy here; falsy case is caught by earlier !msg check */
     if (!(msg instanceof Error)) {msg = new Error(msg ? UnCAUGHT_ERR + msg : UnCAUGHT_ERR)}
     throw msg
   }

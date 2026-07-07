@@ -1,9 +1,6 @@
 import { assert } from 'chai'
 import { createAbortError, pipeAsync, oncePromise, wrapEventEmitter as ee, EventEmitter } from '../src'
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
+import {sleep} from './test-helper'
 
 // Verify it's a real AbortError
 function assertAbortError(err) {
@@ -674,6 +671,106 @@ describe('AbortSignal', () => {
       }
       // Error event IS emitted before error-in-error takes over
       assert.equal(errors.length, 1, 'error event should be emitted')
+    })
+  })
+
+  // ---- _createAbortPromise early-abort via sync listener in parallel mode ----
+  describe('_createAbortPromise early-abort via sync listener in parallel', () => {
+    it('should trigger early-abort when sync listener aborts signal before Promise.race (parallel default)', async () => {
+      // In parallel mode, notifyListener runs synchronously up to the first await.
+      // Inside _notify(), a SYNC listener is called immediately.
+      // If that listener calls controller.abort(), signal.aborted becomes true
+      // BEFORE _createAbortPromise(signal, evt) is created.
+      // This covers default-methods.js lines 521-523.
+      const emitter = ee()
+      const controller = new AbortController()
+
+      let syncListenerAborted = false
+      // Sync listener aborts the signal during notifyListener's synchronous execution
+      emitter.on('test', () => {
+        syncListenerAborted = true
+        controller.abort()  // signal.aborted becomes true SYNCHRONOUSLY
+      })
+      // Second listener would hang forever if it ran (won't run since AbortError)
+      emitter.on('test', async () => {
+        await new Promise(() => {})  // never resolves
+      })
+
+      try {
+        // Signal is NOT aborted initially → emitAsync proceeds
+        // Parallel mode: listeners.map calls notifyListener for each listener
+        // The sync listener's _notify runs, calls controller.abort()
+        // Then _createAbortPromise(signal, evt) is called with signal.aborted === TRUE
+        await emitter.configure({ signal: controller.signal, asyncMode: 'parallel' }).emitAsync('test')
+        assert.fail('should have thrown AbortError')
+      } catch (err) {
+        assertAbortError(err)
+      }
+      assert.isTrue(syncListenerAborted, 'sync listener should have run')
+    })
+
+    it('should trigger early-abort via sync listener in parallel with raiseError=true', async () => {
+      // Same scenario but with raiseError=true (uses Promise.allSettled path)
+      const emitter = ee()
+      const controller = new AbortController()
+
+      emitter.on('test', () => {
+        controller.abort()  // synchronous abort during notifyListener
+      })
+      emitter.on('test', async () => {
+        await new Promise(() => {})
+      })
+
+      try {
+        await emitter
+          .configure({ signal: controller.signal, asyncMode: 'parallel', raiseError: true })
+          .emitAsync('test')
+        assert.fail('should have thrown AbortError')
+      } catch (err) {
+        assertAbortError(err)
+      }
+    })
+
+    it('should trigger early-abort via sync listener in parallel with collect mode', async () => {
+      const emitter = ee()
+      const controller = new AbortController()
+
+      emitter.on('test', () => {
+        controller.abort()  // synchronous abort during notifyListener
+      })
+      emitter.on('test', async () => {
+        await new Promise(() => {})
+      })
+
+      try {
+        await emitter
+          .configure({ signal: controller.signal, asyncMode: 'parallel', resultMode: 'collect' })
+          .emitAsync('test')
+        assert.fail('should have thrown AbortError')
+      } catch (err) {
+        assertAbortError(err)
+      }
+    })
+
+    it('should trigger early-abort via sync listener in parallel with first mode', async () => {
+      const emitter = ee()
+      const controller = new AbortController()
+
+      emitter.on('test', () => {
+        controller.abort()
+      })
+      emitter.on('test', async () => {
+        await new Promise(() => {})
+      })
+
+      try {
+        await emitter
+          .configure({ signal: controller.signal, asyncMode: 'parallel', resultMode: 'first' })
+          .emitAsync('test')
+        assert.fail('should have thrown AbortError')
+      } catch (err) {
+        assertAbortError(err)
+      }
     })
   })
 

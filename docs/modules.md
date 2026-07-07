@@ -15,6 +15,7 @@
 - [eventable](eventable/README.md)
 - [has-listeners](has-listeners/README.md)
 - [index](index/README.md)
+- [once-promise](once-promise/README.md)
 - [pipe](pipe/README.md)
 - [pipe-async](pipe-async/README.md)
 - [unify](unify/README.md)

@@ -14,6 +14,12 @@ Re-exports [allOff](../all-off/functions/allOff.md)
 
 ***
 
+### createAbortError
+
+Re-exports [createAbortError](../consts/functions/createAbortError.md)
+
+***
+
 ### default
 
 Renames and re-exports [EventEmitter](../event-emitter/classes/EventEmitter.md)
@@ -47,6 +53,12 @@ Re-exports [hasListeners](../has-listeners/functions/hasListeners.md)
 ### methods
 
 Re-exports [methods](../wrap-event-emitter/variables/methods.md)
+
+***
+
+### oncePromise
+
+Re-exports [oncePromise](../once-promise/functions/oncePromise.md)
 
 ***
 

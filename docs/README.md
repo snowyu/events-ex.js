@@ -18,8 +18,9 @@ Browser-friendly enhanced event emitter [ability][Ability] and class. It's modif
   * **Configurable Concurrency**: Choose between **Serial** (default) and **Parallel** execution for async listeners.
   * **Result Aggregation**: Strategies to gather return values: `last` (default), `first` (first success), and `collect` (all results).
   * **Fluent API Proxies**: Use `.parallel()` and `.configure()` for transient, side-effect-free execution context.
+  * **AbortSignal Support**: Cancel async event emissions via `configure({ signal })` or `oncePromise` with an `AbortSignal`.
 * **Architecture**: Rewritten core for improved performance and flexibility while maintaining broad compatibility.
-* **Event Utilities**: Built-in support for `pipe`, `pipeAsync`, `unify`, `allOff`, and `hasListeners`.
+* **Event Utilities**: Built-in support for `pipe`, `pipeAsync`, `oncePromise`, `unify`, `allOff`, and `hasListeners`.
 
 ### Differences
 
@@ -28,6 +29,7 @@ Browser-friendly enhanced event emitter [ability][Ability] and class. It's modif
     + the `event object` as listener's "this" object:
       * `result`: If set, the result is returned to the `Event Emitter`.
       * `stopped`: If set to `true`, it prevents the remaining listeners from being executed.
+      * `aborted`: (Async only) `true` if the emission was cancelled by an `AbortSignal`.
       * `target`: The `Event Emitter` object, which was originally the `this` object.
       * `type`: triggered event type(name).
       * `resolved`: (Async only) Indicates if a successful result has been found in `first` mode.
@@ -43,7 +45,7 @@ Browser-friendly enhanced event emitter [ability][Ability] and class. It's modif
       * `collect`: Returns an array of all results in registration order.
   * **Fluent Configuration**: Use `.parallel()` or `.configure({...})` for one-time customized async emits.
   * **Listener APIs**: `on/once(event: string|RegExp, listener, index?: number|'first'|'last')`
-    * 📌 **Index Parameter** (Optional): Insertion position in the listener array. 
+    * 📌 **Index Parameter** (Optional): Insertion position in the listener array.
       * `'first'` (`-Infinity`): Stays in the **Head** zone. The first listener added as `'first'` is placed at the very front.
       * `'last'` (`Infinity`): Stays in the **Tail** zone. The first listener added as `'last'` will always remain at the absolute end.
       * `number`: Relative index within the **Body** zone.
@@ -63,7 +65,7 @@ Browser-friendly enhanced event emitter [ability][Ability] and class. It's modif
   * `pipeAsync(source, target, options)`: Async forwarding with configurable concurrency and aggregation.
   * `unify(emitter1, emitter2)`: Bi-directional synchronization.
 
-Note: The listener throw error should not broke the notification, but it will emit error(`emit('error', error, 'notify', eventName, listener, args)`) after notification.
+Note: A listener's throw error does not break the notification flow—caught errors are collected and then re-emitted as an `'error'` event after all listeners run. **Exception**: If the error is thrown inside an `'error'` event listener itself, it propagates directly as a thrown exception (sync) or a rejected promise (async), preventing infinite recursion / stack overflow. This applies to both `emit()` and `emitAsync()`.
 
 ### Installation
 
@@ -174,6 +176,44 @@ const allResults = await ee.parallel('collect').emitAsync('task');
 const firstResult = await ee.parallel('first').emitAsync('task');
 ```
 
+#### AbortSignal Support (Async Only)
+
+Cancel async event emissions using the standard `AbortSignal` via `configure({ signal })` or `oncePromise` options.
+
+```js
+const emitter = new EventEmitter();
+const controller = new AbortController();
+
+emitter.on('task', async () => {
+  await sleep(500);
+  return 'done';
+});
+
+// emitAsync: pass signal via configure
+setTimeout(() => controller.abort(), 200); // cancel after 200ms
+try {
+  await emitter.configure({ signal: controller.signal }).emitAsync('task');
+} catch (err) {
+  console.log(err.name); // 'AbortError'
+}
+
+// oncePromise: pass signal directly via options
+const c2 = new AbortController();
+setTimeout(() => c2.abort(), 100);
+try {
+  await oncePromise(emitter, 'ready', { signal: c2.signal });
+} catch (err) {
+  console.log(err.name); // 'AbortError'
+}
+```
+
+**Behavior**:
+
+- **Serial mode**: Checks `signal.aborted` before each listener, throws `AbortError` immediately when triggered. When `raiseError` is explicitly set (`true`/`false`/`null`), uses `Promise.race` to interrupt an actively running listener as well.
+- **Parallel mode**: Races listener execution against the signal via `Promise.race`. Throws `AbortError` when the signal wins.
+- **pipeAsync**: In serial mode, checks the source's signal before forwarding to each pipe target; skips remaining targets if aborted.
+- `Event` objects have an `aborted` field (independent of `stopped`) to track cancellation state.
+
 ### Advanced Features
 
 #### Async Concurrency Engine (For `emitAsync` Only)
@@ -185,6 +225,11 @@ const firstResult = await ee.parallel('first').emitAsync('task');
 | **`resultMode`** | `'last'` | **(Default)** Returns the result of the last listener (or last to finish). |
 | | `'first'` | Returns the first **non-undefined** and **successful** result. Skips errors. |
 | | `'collect'` | Returns an array of all results in registration order. |
+| **`signal`** | `AbortSignal` | An `AbortSignal` from an `AbortController` to cancel async event emission. Only passed via `configure()`, not stored on the instance. |
+| **`raiseError`** | `true` | Throws all listener errors immediately. Parallel mode aggregates multiple errors into an `AggregateError`. |
+| | `false` | Silently swallows listener errors. Used with `signal` to interrupt an executing listener in serial mode (added `Promise.race`). |
+| | `null` | **(Default for sync `emit`)** For `'error'` events only: throws if there are no error listeners (Node.js default behavior). |
+| | `undefined` | **(Default)** Same as `false` for `emitAsync`. Keeps existing behavior unchanged. |
 
 #### Proxy Isolation (Fluent API)
 
@@ -252,11 +297,67 @@ hasListeners(emitter, 'foo'); // true
 Creates an asynchronous pipeline.
 
 - `options.asyncMode`: Propagation mode (`'serial' | 'parallel'`).
-- `options.resultMode`: Aggregation strategy.
+- `options.resultMode`: Aggregation strategy (`'last'` default | `'first'` | `'collect'`).
+
+#### oncePromise(emitter, type[, options]) _(events-ex/once-promise)_
+
+Returns a `Promise` that resolves with the **Event object** when the specified event is emitted on the given emitter.
+If an `error` event is emitted (and the waiting event is not `error`), the promise rejects.
+If the provided `AbortSignal` is aborted, the promise rejects with an `AbortError`.
+
+- `emitter` _(EventEmitter)_: The event emitter to listen on.
+- `type` _(string | RegExp)_: The event type to wait for. Supports regex for matching multiple events.
+- `options` _(Object)_: Optional configuration.
+  - `signal` _(AbortSignal)_: An AbortSignal to cancel the wait.
+  - `raiseError` _(boolean|null)_: Controls behavior when an `'error'` event is emitted on the emitter.
+    - `true` / `undefined` **(default)**: The promise rejects with the error.
+    - `false`: The promise resolves with the error object instead of rejecting.
+- Returns: `Promise<Event>` — resolves with the Event object, which provides `type`, `target`, etc.
+
+> Note: The resolved Event object's `result` field may not be the final value if other listeners have not yet run. For the definitive emit return value, use `emit()` or `emitAsync()` directly.
+
+```js
+import {oncePromise, EventEmitter} from 'events-ex';
+
+const ee = new EventEmitter();
+
+// Wait for a data event
+setTimeout(() => ee.emit('data', { id: 1 }), 100);
+const evt = await oncePromise(ee, 'data');
+console.log(evt.type);   // 'data'
+console.log(evt.target); // the emitter
+
+// Wait for a regex-matched event – evt.type reveals the actual event
+setTimeout(() => ee.emit('user.login', { name: 'Alice' }), 100);
+const evt2 = await oncePromise(ee, /^user\./);
+console.log(evt2.type); // 'user.login' (not the regex)
+
+// Error handling: rejects on error (unless waiting for 'error')
+try {
+  await oncePromise(ee, 'data');
+} catch (err) {
+  console.error('Error occurred:', err);
+}
+
+// Waiting for 'error' event resolves normally
+ee.emit('error', new Error('expected'));
+await oncePromise(ee, 'error'); // resolves, not rejects
+
+// Use AbortSignal for timeout cancellation
+const controller = new AbortController();
+setTimeout(() => controller.abort(), 5000);
+try {
+  const evt = await oncePromise(ee, 'response', { signal: controller.signal });
+} catch (err) {
+  if (err.name === 'AbortError') {
+    console.log('timed out or cancelled');
+  }
+}
+```
 
 #### setEmitterOptions(options)
 
-Configures instance-wide defaults for `asyncMode`, `resultMode`, and `maxListeners`.
+Configures instance-wide defaults for `asyncMode`, `resultMode`, `maxListeners`, and `raiseError`.
 
 [event-emitter]: https://github.com/medikoo/event-emitter
 [Ability]: https://github.com/snowyu/custom-ability.js

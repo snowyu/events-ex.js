@@ -8,7 +8,7 @@
 
 > `const` **states**: `object`
 
-Defined in: [src/consts.js:6](https://github.com/snowyu/events-ex.js/blob/f6c44157ffda17957fad5ad2e0aedbb8ec521be7/src/consts.js#L6)
+Defined in: [src/consts.js:6](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/consts.js#L6)
 
 ## Type Declaration
 
@@ -18,7 +18,7 @@ Defined in: [src/consts.js:6](https://github.com/snowyu/events-ex.js/blob/f6c441
 
 ### CONTINUE
 
-> **CONTINUE**: `any`
+> **CONTINUE**: `undefined`
 
 ### DONE
 
