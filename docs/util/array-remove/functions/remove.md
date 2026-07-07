@@ -8,7 +8,7 @@
 
 > **remove**(...`args`): `void`
 
-Defined in: [src/util/array-remove.js:5](https://github.com/snowyu/events-ex.js/blob/4b0e5c2237202c2cc8b9e9244905d2c668799451/src/util/array-remove.js#L5)
+Defined in: [src/util/array-remove.js:5](https://github.com/snowyu/events-ex.js/blob/d89c80cf382abdccb9c4850d2bd1f0f83664a6cd/src/util/array-remove.js#L5)
 
 ## Parameters
 
