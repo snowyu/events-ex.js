@@ -15,7 +15,7 @@ const LIB_DIR = "lib";
 
 // Matches:  from './foo.js'   from "../bar.js"   from './baz'
 // Does NOT match bare specifiers like: from "inherits-ex"
-const IMPORT_RE = /(from\s+['"])(\.\.?\/[^'"]*?)(\.js)?(['"])/g;
+const IMPORT_RE = /(from\s+['"]|import\s+['"])(\.\.?\/[^'"]*?)(\.js)?(['"])/g;
 
 function ensureDir(dirPath) {
   if (!fs.existsSync(dirPath)) {
