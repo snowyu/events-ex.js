@@ -8,7 +8,7 @@
 
 > **pipe**(`e1`, `e2`, ...`args`): `Object`
 
-Defined in: [src/pipe.js:21](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/pipe.js#L21)
+Defined in: [src/pipe.js:21](https://github.com/snowyu/events-ex.js/blob/1738d9bce8d1eae4826213336afe3c0c8e5fa482/src/pipe.js#L21)
 
 Creates a pipeline between two event emitters, so that any events emitted by the first emitter are also emitted by the second emitter.
 

@@ -8,7 +8,7 @@
 
 > **getEventableMethods**(`aClass`): `object`
 
-Defined in: [src/default-methods.js:15](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/default-methods.js#L15)
+Defined in: [src/default-methods.js:15](https://github.com/snowyu/events-ex.js/blob/1738d9bce8d1eae4826213336afe3c0c8e5fa482/src/default-methods.js#L15)
 
 ## Parameters
 

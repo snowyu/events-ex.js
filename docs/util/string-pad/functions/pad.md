@@ -8,7 +8,7 @@
 
 > **pad**(`fill`, ...`args`): `string`
 
-Defined in: [src/util/string-pad.js:8](https://github.com/snowyu/events-ex.js/blob/d26bdae527dff2296ff52d0d7b94d37c9f694683/src/util/string-pad.js#L8)
+Defined in: [src/util/string-pad.js:8](https://github.com/snowyu/events-ex.js/blob/1738d9bce8d1eae4826213336afe3c0c8e5fa482/src/util/string-pad.js#L8)
 
 ## Parameters
 
