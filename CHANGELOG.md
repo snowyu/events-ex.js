@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.4.1](https://github.com/snowyu/events-ex.js/compare/v2.4.0...v2.4.1) (2026-07-07)
+
+
+### Bug Fixes
+
+* should import defineProperty from root entry ([4b0e5c2](https://github.com/snowyu/events-ex.js/commit/4b0e5c2237202c2cc8b9e9244905d2c668799451))
+
 ## [2.4.0](https://github.com/snowyu/events-ex.js/compare/v2.3.1...v2.4.0) (2026-07-07)
 
 
