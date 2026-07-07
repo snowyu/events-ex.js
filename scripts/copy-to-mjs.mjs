@@ -1,38 +1,79 @@
-import { readFileSync, writeFileSync, readdirSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+/**
+ * Copies all .js files from src/ to lib/ as .mjs files,
+ * rewriting relative import/export paths from .js to .mjs
+ * (and adding .mjs to bare relative paths missing an extension).
+ *
+ * This ensures Node.js recognizes the ESM source files natively
+ * (via .mjs extension) without needing "type": "module" in
+ * package.json.
+ */
+const fs = require("fs");
+const path = require("path");
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const srcDir = join(__dirname, '..', 'src');
-const libDir = join(__dirname, '..', 'lib');
+const SRC_DIR = "src";
+const LIB_DIR = "lib";
 
-// Ensure lib directory exists
-mkdirSync(libDir, { recursive: true });
+// Matches:  from './foo.js'   from "../bar.js"   from './baz'
+// Does NOT match bare specifiers like: from "inherits-ex"
+const IMPORT_RE = /(from\s+['"])(\.\.?\/[^'"]*?)(\.js)?(['"])/g;
 
-// Get all .js files in src
-const files = readdirSync(srcDir).filter(f => f.endsWith('.js'));
-let count = 0;
+function ensureDir(dirPath) {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+}
 
-for (const file of files) {
-  const srcPath = join(srcDir, file);
-  const mjsFile = file.replace(/\.js$/, '.mjs');
-  const destPath = join(libDir, mjsFile);
+/**
+ * Recursively walk a directory and process all .js files.
+ */
+function walkDir(currentDir, relativeDir) {
+  const entries = fs.readdirSync(currentDir, { withFileTypes: true });
 
-  let content = readFileSync(srcPath, 'utf-8');
+  for (const entry of entries) {
+    const fullPath = path.join(currentDir, entry.name);
+    const relativePath = relativeDir
+      ? path.join(relativeDir, entry.name)
+      : entry.name;
 
-  // Rewrite relative import/export paths:
-  //   from './path.js' -> from './path.mjs'
-  //   from './path'    -> from './path.mjs'
-  content = content.replace(
-    /(from\s+['"])(\.\/[^'"]*?)(?:\.js)?(['"])/g,
-    (_match, prefix, path, quote) => {
-      const cleanPath = path.replace(/\.js$/, '');
-      return `${prefix}${cleanPath}.mjs${quote}`;
+    if (entry.isDirectory()) {
+      walkDir(fullPath, relativePath);
+    } else if (entry.name.endsWith(".js")) {
+      processFile(fullPath, relativePath);
+    }
+  }
+}
+
+/**
+ * Read a .js source file, rewrite import paths, and write as .mjs.
+ */
+function processFile(srcPath, relativePath) {
+  const content = fs.readFileSync(srcPath, "utf8");
+  const mjsContent = content.replace(
+    IMPORT_RE,
+    (match, prefix, modulePath, dotJs, suffix) => {
+      // prefix:  from "   or   from '
+      // modulePath:  ./foo   or   ../bar/baz
+      // dotJs:  .js  (if present)
+      // suffix:  "   or   '
+      return `${prefix}${modulePath}.mjs${suffix}`;
     },
   );
 
-  writeFileSync(destPath, content, 'utf-8');
-  count++;
+  const mjsName = entryNameToMjs(relativePath);
+  const destPath = path.join(LIB_DIR, mjsName);
+
+  ensureDir(path.dirname(destPath));
+  fs.writeFileSync(destPath, mjsContent, "utf8");
+
+  console.log(`  ✓ ${relativePath} → ${path.join("lib", mjsName)}`);
 }
 
-console.log(`Copied ${count} files from src/ to lib/ with .mjs extension, paths rewritten`);
+function entryNameToMjs(name) {
+  return name.replace(/\.js$/, ".mjs");
+}
+
+// --- Main ---
+console.log("Copying ESM files (.mjs) from src/ to lib/ ...");
+ensureDir(LIB_DIR);
+walkDir(SRC_DIR, "");
+console.log("Done.");

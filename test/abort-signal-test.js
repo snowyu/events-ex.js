@@ -1,9 +1,5 @@
 import { assert } from 'chai'
-import ee from '../src/wrap-event-emitter'
-import { EventEmitter } from '../src'
-import { oncePromise } from '../src/once-promise'
-import { pipeAsync } from '../src/pipe-async'
-import { createAbortError } from '../src/consts'
+import { createAbortError, pipeAsync, oncePromise, wrapEventEmitter as ee, EventEmitter } from '../src'
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))

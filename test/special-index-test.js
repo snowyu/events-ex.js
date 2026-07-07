@@ -1,5 +1,7 @@
 import {assert} from "chai";
 import eventEmitter from '../src/wrap-event-emitter';
+import eventable from '../src/eventable';
+import {RegExpEventSymbol} from '../src/consts';
 
 describe('special-index-support', () => {
     it('should add "first" listeners at the beginning of the array', () => {
@@ -284,7 +286,6 @@ describe('special-index-support', () => {
     });
 
     it('should work when injected via eventable', () => {
-        const eventable = require('../src/eventable').default;
         class MyClass {}
         eventable(MyClass);
         const x = new MyClass();
@@ -438,7 +439,6 @@ describe('special-index-support', () => {
         // _events[RegExpSymbol]['/foo/'] has its own _headCount
         assert.equal(x._events.foo._headCount, 1);
         
-        const {RegExpEventSymbol} = require('../src/consts');
         const regEvents = x._events[RegExpEventSymbol];
         assert.equal(regEvents['/foo/']._headCount, 1);
         

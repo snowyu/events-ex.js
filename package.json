@@ -47,21 +47,22 @@
     "util-ex": "^2.7.0"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^9.0.0",
-    "@babel/cli": "^7.28.6",
-    "@babel/core": "^7.29.0",
-    "@babel/plugin-proposal-dynamic-import": "^7.18.6",
-    "@babel/plugin-transform-modules-commonjs": "^7.28.6",
-    "@babel/register": "^7.29.3",
+    "@antfu/eslint-config": "^9.1.0",
+    "@babel/cli": "^8.0.1",
+    "@babel/core": "^8.0.1",
+    "@babel/plugin-transform-dynamic-import": "^8.0.1",
+    "@babel/plugin-transform-modules-commonjs": "^8.0.1",
+    "@babel/register": "^8.0.1",
+    "@vitest/coverage-v8": "^4.1.10",
     "chai": "~6.2.2",
     "eslint": "^10.4.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-tsdoc": "^0.5.2",
-    "mocha": "^11.7.6",
-    "prettier": "^3.8.3",
+    "prettier": "^3.9.4",
     "typedoc": "^0.28.19",
     "typedoc-plugin-markdown": "^4.11.0",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.10"
   },
   "scripts": {
     "build": "npm run build.cjs && npm run build.ts && npm run doc.md",
@@ -77,7 +78,9 @@
     "lint.fix": "npm run lint -- --fix",
     "release": "npm run clean && npm run build && git add docs -f && git ci -m 'docs: update API docs' && npx commit-and-tag-version -s",
     "release.alpha": "npm run release -- --prerelease alpha",
-    "test": "mocha"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "pre-commit": {
     "run": [
