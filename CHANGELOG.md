@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.4.2](https://github.com/snowyu/events-ex.js/compare/v2.4.1...v2.4.2) (2026-07-07)
+
+
+### Bug Fixes
+
+* adjust import path with "./" ([09153cb](https://github.com/snowyu/events-ex.js/commit/09153cb38a5d0a29315e70b177c68ffbc7de4c07))
+
 ## [2.4.1](https://github.com/snowyu/events-ex.js/compare/v2.4.0...v2.4.1) (2026-07-07)
 
 
