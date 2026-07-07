@@ -7,8 +7,8 @@
  * (via .mjs extension) without needing "type": "module" in
  * package.json.
  */
-const fs = require("fs");
-const path = require("path");
+import fs from 'fs'
+import path from 'path'
 
 const SRC_DIR = "src";
 const LIB_DIR = "lib";
