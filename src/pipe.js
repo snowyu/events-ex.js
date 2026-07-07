@@ -1,4 +1,4 @@
-import defineProperty from 'util-ex/lib/defineProperty'
+import {defineProperty} from 'util-ex'
 
 import {methods} from './wrap-event-emitter'
 import arrRemove from './util/array-remove'

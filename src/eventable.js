@@ -1,5 +1,5 @@
 import {createAbilityInjector} from 'custom-ability'
-import defineProperty from 'util-ex/lib/defineProperty'
+import {defineProperty} from 'util-ex'
 import defaultMethods from './default-methods'
 
 /**
