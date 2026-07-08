@@ -43,8 +43,8 @@
     }
   },
   "dependencies": {
-    "custom-ability": "^2.3.0",
-    "util-ex": "^2.7.0"
+    "custom-ability": "^2.3.1",
+    "util-ex": "^2.7.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^9.1.0",
