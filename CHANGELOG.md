@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.4.3](https://github.com/snowyu/events-ex.js/compare/v2.4.2...v2.4.3) (2026-07-08)
+
 ## [2.4.2](https://github.com/snowyu/events-ex.js/compare/v2.4.1...v2.4.2) (2026-07-07)
 
 
