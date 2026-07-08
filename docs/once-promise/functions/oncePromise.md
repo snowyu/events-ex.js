@@ -8,7 +8,7 @@
 
 > **oncePromise**(`emitter`, `type`, `options?`): `Promise`\<[`Event`](../../event/classes/Event.md)\>
 
-Defined in: [src/once-promise.js:23](https://github.com/snowyu/events-ex.js/blob/d89c80cf382abdccb9c4850d2bd1f0f83664a6cd/src/once-promise.js#L23)
+Defined in: [src/once-promise.js:23](https://github.com/snowyu/events-ex.js/blob/bbf438be440e5a9f2be264532e8ba99ae44b6989/src/once-promise.js#L23)
 
 Returns a Promise that resolves with the Event object when the specified event is emitted on the given emitter.
 If an 'error' event is emitted (and the waiting event is not 'error'), the promise rejects by default.

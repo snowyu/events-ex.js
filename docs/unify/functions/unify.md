@@ -8,7 +8,7 @@
 
 > **unify**(`e1`, `e2`): `void`
 
-Defined in: [src/unify.js:17](https://github.com/snowyu/events-ex.js/blob/d89c80cf382abdccb9c4850d2bd1f0f83664a6cd/src/unify.js#L17)
+Defined in: [src/unify.js:17](https://github.com/snowyu/events-ex.js/blob/bbf438be440e5a9f2be264532e8ba99ae44b6989/src/unify.js#L17)
 
 Unifies the event listeners of two event emitter objects so that they share the same set of listeners for each event.
 
