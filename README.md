@@ -29,6 +29,8 @@ Browser-friendly enhanced event emitter [ability][Ability] and class. It's modif
       * `target`: The `Event Emitter` object, which was originally the `this` object.
       * `type`: triggered event type(name).
       * `resolved`: (Async only) Indicates if a successful result has been found in `first` mode.
+      * `config`: (New) A frozen object containing the emission options (`asyncMode`, `resultMode`, `signal`, `raiseError`).
+        Available to listeners via `this.config` for introspection. `undefined` when no options are set.
     * **`broken change`**: The `emit` return the result of listeners's callback function instead of the successful state.
     * **`broken change`**: The `this` object of listeners' callback function is the `Event` Object instead of the emitter object.
       * The emitter object is put into the `target` property of the `Event` Object.
@@ -227,9 +229,43 @@ try {
 | | `null` | **(Default for sync `emit`)** For `'error'` events only: throws if there are no error listeners (Node.js default behavior). |
 | | `undefined` | **(Default)** Same as `false` for `emitAsync`. Keeps existing behavior unchanged. |
 
+> 💡 **Tip**: All these options are available for introspection inside listeners via `this.config`. See the [Inspecting Emission Configuration](#inspecting-emission-configuration-via-thisconfig) section.
+
 #### Proxy Isolation (Fluent API)
 
 Calling `.parallel()` or `.configure()` returns a transient Proxy Object (`Object.create(this)`), allowing thread-safe, isolated configurations for specific emits.
+
+#### Inspecting Emission Configuration via `this.config`
+
+The Event object passed to listeners (as `this`) carries a frozen snapshot of the emission options in `this.config`. This allows listeners to introspect how the current emit was configured.
+
+```js
+const ee = new EventEmitter();
+ee.setEmitterOptions({ asyncMode: 'parallel', resultMode: 'collect' });
+
+ee.on('data', function(value) {
+  // Inspect the emission configuration
+  console.log(this.config.asyncMode);   // 'parallel'
+  console.log(this.config.resultMode);  // 'collect'
+  console.log(this.config.signal);      // AbortSignal | undefined
+  console.log(this.config.raiseError);  // true | false | null | undefined
+
+  // Runtime options (via configure()) override instance-level options
+});
+
+// Instance-level options reflected in config
+ee.emit('data', 42);
+
+// Runtime configure() overrides reflected in config
+ee.configure({ asyncMode: 'serial' }).emit('data', 42);
+// Inside listener: this.config.asyncMode === 'serial'
+```
+
+Key behaviors:
+- **Frozen**: `this.config` is `Object.freeze()`'d — listeners cannot accidentally mutate it.
+- **Per-emit isolation**: Each `emit()` / `emitAsync()` call creates a fresh frozen config object.
+- **Conditional**: `config` is `undefined` on the Event when no options have been configured.
+- **Works everywhere**: Available in both `emit()` and `emitAsync()`, including on Events resolved by `oncePromise`.
 
 #### Safe Injection (AoP Compatibility) & Name Collisions
 
@@ -308,9 +344,11 @@ If the provided `AbortSignal` is aborted, the promise rejects with an `AbortErro
   - `raiseError` _(boolean|null)_: Controls behavior when an `'error'` event is emitted on the emitter.
     - `true` / `undefined` **(default)**: The promise rejects with the error.
     - `false`: The promise resolves with the error object instead of rejecting.
-- Returns: `Promise<Event>` — resolves with the Event object, which provides `type`, `target`, etc.
+- Returns: `Promise<Event>` — resolves with the Event object, which provides `type`, `target`, `config`, etc.
 
 > Note: The resolved Event object's `result` field may not be the final value if other listeners have not yet run. For the definitive emit return value, use `emit()` or `emitAsync()` directly.
+
+The resolved Event also includes a `config` property (if the emitter had options configured), containing a frozen snapshot of the emission options used when the event was emitted. See [Inspecting Emission Configuration](#inspecting-emission-configuration-via-thisconfig) for details.
 
 ```js
 import {oncePromise, EventEmitter} from 'events-ex';

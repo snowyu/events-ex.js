@@ -18,6 +18,7 @@ import {createAbortError} from './consts'
  *   - `true` / `undefined` (default): The promise rejects with the error.
  *   - `false`: The promise resolves with the error object instead of rejecting.
  * @returns {Promise<import('./event').Event>} - A promise that resolves with the Event object.
+ *   The resolved Event has `type`, `target`, `result`, and `config` (if the emitter had emission options configured).
  * @throws {TypeError} - If emitter is not a valid event emitter object.
  */
 export function oncePromise(emitter, type, options) {

@@ -29,6 +29,8 @@
       * `target`属性: 事件发射器对象,原本的`this`
       * `type`属性: 触发的事件类型名称
       * `resolved`: (仅异步) 在 `first` 模式下，标识是否已找到成功的结果。
+      * `config`: (New) 一个冻结的对象，包含发射选项快照（`asyncMode`、`resultMode`、`signal`、`raiseError`）。
+        监听器可通过 `this.config` 进行自省。未设置任何选项时为 `undefined`。
     * **`改变`**: `emit` 方法返回监听器回调函数的结果而不是成功状态。
     * **`改变`**: 监听器回调函数的 `this` 对象是 `Event Object` 事件对象而不是事件发射器对象。
       * 事件发射器对象被放入 `Event` 对象的 `target` 属性中。
@@ -204,9 +206,43 @@ try {
 | | `null` | **(同步 `emit` 默认值)** 仅针对 `error` 事件：无 error 监听器时抛出（Node.js 默认行为）。 |
 | | `undefined` | **(默认值)** 对 `emitAsync` 等同于 `false`。保持现有行为不变。 |
 
+> 💡 **提示**：以上所有选项均可通过 `this.config` 在监听器内部自省。参见[通过 this.config 检查发射配置](#通过-thisconfig-检查发射配置)小节。
+
 #### 代理隔离 (Fluent API)
 
 调用 `.parallel()` 或 `.configure()` 返回一个临时的代理对象 (`Object.create(this)`)，确保并发场景下的线程安全和配置隔离。
+
+#### 通过 `this.config` 检查发射配置
+
+传递给监听器的 Event 对象（作为 `this`）携带了发射选项的冻结快照，存储在 `this.config` 中。这使得监听器可以自省当前 emit 是如何配置的。
+
+```js
+const ee = new EventEmitter();
+ee.setEmitterOptions({ asyncMode: 'parallel', resultMode: 'collect' });
+
+ee.on('data', function(value) {
+  // 检查发射配置
+  console.log(this.config.asyncMode);   // 'parallel'
+  console.log(this.config.resultMode);  // 'collect'
+  console.log(this.config.signal);      // AbortSignal | undefined
+  console.log(this.config.raiseError);  // true | false | null | undefined
+
+  // 运行时选项（通过 configure()）会覆盖实例级选项
+});
+
+// 实例级选项反映在 config 中
+ee.emit('data', 42);
+
+// 运行时 configure() 的覆盖也会反映在 config 中
+ee.configure({ asyncMode: 'serial' }).emit('data', 42);
+// 在监听器内: this.config.asyncMode === 'serial'
+```
+
+关键行为：
+- **冻结(Frozen)**：`this.config` 经过 `Object.freeze()` 处理——监听器无法意外修改它。
+- **每次发射独立**：每次 `emit()` / `emitAsync()` 调用都会创建一个新的冻结 config 对象。
+- **条件性**：当没有配置任何选项时，Event 上的 `config` 为 `undefined`。
+- **全场景适用**：在 `emit()` 和 `emitAsync()` 中均可使用，也包括 `oncePromise` 解析出的 Event。
 
 #### 安全注入 (AoP 兼容性) 与命名冲突
 
@@ -272,9 +308,11 @@ eventable(MyClass, {
   - `raiseError` _(boolean|null)_: 控制当 emitter 触发 `'error'` 事件时的行为。
     - `true` / `undefined` **（默认）**: Promise reject 并传入错误对象。
     - `false`: Promise resolve 并传入错误对象，而非 reject。
-- 返回: `Promise<Event>` — resolve 时传入 Event 对象，包含 `type`、`target` 等属性。
+- 返回: `Promise<Event>` — resolve 时传入 Event 对象，包含 `type`、`target`、`config` 等属性。
 
 > 注意：返回的 Event 对象中的 `result` 字段可能不是最终值（如果还有其他监听器尚未执行）。如需获取 emit 的最终返回值，请直接使用 `emit()` 或 `emitAsync()`。
+
+如果 emitter 配置了选项，解析出的 Event 还会包含一个 `config` 属性，其中包含事件发射时所用发射选项的冻结快照。详情参见[通过 this.config 检查发射配置](#通过-thisconfig-检查发射配置)小节。
 
 ```js
 import {oncePromise, EventEmitter} from 'events-ex';

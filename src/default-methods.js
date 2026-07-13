@@ -190,9 +190,9 @@ export function getEventableMethods(aClass) {
       if (!r) {return}
       const args = r.args
       const listeners = r.listeners
-      const evt = Event(this, r.type)
-      const errs = []
       const opts = _getOptions(this)
+      const evt = Event(this, r.type, opts)
+      const errs = []
       let _throwErr
       try {
         let i = 0
@@ -238,7 +238,7 @@ export function getEventableMethods(aClass) {
       if (!r) {return}
       const args = r.args
       const listeners = r.listeners
-      const evt = Event(this, r.type)
+      const evt = Event(this, r.type, options)
       let _throwErr
       try {
         await _executeAsync.call(this, listeners, evt, args, options)
