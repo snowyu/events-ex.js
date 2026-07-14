@@ -8,7 +8,7 @@
 
 > **wrapEventEmitter**(`o?`, `options?`): `any`
 
-Defined in: [src/wrap-event-emitter.js:37](https://github.com/snowyu/events-ex.js/blob/bbf438be440e5a9f2be264532e8ba99ae44b6989/src/wrap-event-emitter.js#L37)
+Defined in: [src/wrap-event-emitter.js:37](https://github.com/snowyu/events-ex.js/blob/dfafa626c9ca8a0c4a512183ccc8e07750acda01/src/wrap-event-emitter.js#L37)
 
 Create or inject the eventable instance into the object
 

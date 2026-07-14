@@ -8,7 +8,7 @@
 
 > **oncePromise**(`emitter`, `type`, `options?`): `Promise`\<[`Event`](../../event/classes/Event.md)\>
 
-Defined in: [src/once-promise.js:23](https://github.com/snowyu/events-ex.js/blob/bbf438be440e5a9f2be264532e8ba99ae44b6989/src/once-promise.js#L23)
+Defined in: [src/once-promise.js:24](https://github.com/snowyu/events-ex.js/blob/dfafa626c9ca8a0c4a512183ccc8e07750acda01/src/once-promise.js#L24)
 
 Returns a Promise that resolves with the Event object when the specified event is emitted on the given emitter.
 If an 'error' event is emitted (and the waiting event is not 'error'), the promise rejects by default.
@@ -54,6 +54,7 @@ An AbortSignal to cancel the wait.
 `Promise`\<[`Event`](../../event/classes/Event.md)\>
 
 - A promise that resolves with the Event object.
+  The resolved Event has `type`, `target`, `result`, and `config` (if the emitter had emission options configured).
 
 ## Throws
 

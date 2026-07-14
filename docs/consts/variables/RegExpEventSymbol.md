@@ -8,4 +8,4 @@
 
 > `const` **RegExpEventSymbol**: `symbol` \| `"@@RegExpEvent"`
 
-Defined in: [src/consts.js:14](https://github.com/snowyu/events-ex.js/blob/bbf438be440e5a9f2be264532e8ba99ae44b6989/src/consts.js#L14)
+Defined in: [src/consts.js:14](https://github.com/snowyu/events-ex.js/blob/dfafa626c9ca8a0c4a512183ccc8e07750acda01/src/consts.js#L14)

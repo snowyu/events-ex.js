@@ -8,7 +8,7 @@
 
 > **pipeAsync**(`e1`, `e2`, ...`args`): `Object`
 
-Defined in: [src/pipe-async.js:26](https://github.com/snowyu/events-ex.js/blob/bbf438be440e5a9f2be264532e8ba99ae44b6989/src/pipe-async.js#L26)
+Defined in: [src/pipe-async.js:26](https://github.com/snowyu/events-ex.js/blob/dfafa626c9ca8a0c4a512183ccc8e07750acda01/src/pipe-async.js#L26)
 
 Creates a pipeline between two event emitters, so that any events emitted by the first emitter are also emitted by the second emitter.
 

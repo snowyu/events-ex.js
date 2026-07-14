@@ -8,7 +8,7 @@
 
 > **forEach**(`obj`, `cb`, ...`args`): `void`
 
-Defined in: [src/util/object-for-each.js:6](https://github.com/snowyu/events-ex.js/blob/bbf438be440e5a9f2be264532e8ba99ae44b6989/src/util/object-for-each.js#L6)
+Defined in: [src/util/object-for-each.js:6](https://github.com/snowyu/events-ex.js/blob/dfafa626c9ca8a0c4a512183ccc8e07750acda01/src/util/object-for-each.js#L6)
 
 ## Parameters
 
