@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.5.0](https://github.com/snowyu/events-ex.js/compare/v2.4.3...v2.5.0) (2026-07-14)
+
+
+### Features
+
+* add frozen emission config (evt.config) to Event object ([dfafa62](https://github.com/snowyu/events-ex.js/commit/dfafa626c9ca8a0c4a512183ccc8e07750acda01))
+
 ## [2.4.3](https://github.com/snowyu/events-ex.js/compare/v2.4.2...v2.4.3) (2026-07-08)
 
 ## [2.4.2](https://github.com/snowyu/events-ex.js/compare/v2.4.1...v2.4.2) (2026-07-07)
