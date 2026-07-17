@@ -67,10 +67,10 @@
   "scripts": {
     "build": "npm run build.cjs && npm run build.ts && npm run doc.md",
     "build.cjs": "babel src --out-dir lib --config-file ./.babelrc && node scripts/copy-to-mjs.mjs",
-    "build.ts": "tsc --declaration --emitDeclarationOnly --outDir lib && cp src/event-emitter.d.ts lib/",
+    "build.ts": "tsc --declaration --emitDeclarationOnly --outDir lib && node scripts/copy-dts.mjs",
     "clean": "rm -fr web docs lib",
     "clean.doc": "rm -fr web docs",
-    "clean.ts": "rm -fr lib/*.d.ts",
+    "clean.ts": "rm -fr lib/*.d.ts lib/*.d.mts",
     "clean.lib": "rm -fr lib",
     "doc": "typedoc --plugin none --out web ./src",
     "doc.md": "typedoc --plugin typedoc-plugin-markdown --out docs ./src",
